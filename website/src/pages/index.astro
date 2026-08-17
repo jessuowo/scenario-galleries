@@ -157,6 +157,7 @@ function getScenarioCover(scenario) {
                   href={`/scenarios/${scenario.slug}`}
                   data-search={searchText}
                   data-title={scenario.title}
+                  data-scenario={scenario.slug}
                 >
                   <div class="cover">
   {
@@ -207,11 +208,11 @@ function getScenarioCover(scenario) {
                       <span>•</span>
 
                       <span>
-                        {totalImages}
+                        <span class="scenario-image-number">0</span>
                         {" "}
-                        {totalImages === 1
-                          ? "image"
-                          : "images"}
+                        <span class="scenario-image-label">
+                          images
+                        </span>
                       </span>
                     </div>
 
@@ -242,6 +243,65 @@ function getScenarioCover(scenario) {
       const scenarioCards = Array.from(
         document.querySelectorAll(".scenario-card")
       );
+
+      async function loadScenarioCounts() {
+        await Promise.all(
+          scenarioCards.map(async (card) => {
+            const scenarioSlug =
+              card.dataset.scenario;
+
+            if (!scenarioSlug) {
+              return;
+            }
+
+            try {
+              const response = await fetch(
+                `/api/scenario-summary?scenario=${encodeURIComponent(
+                  scenarioSlug
+                )}`
+              );
+
+              if (!response.ok) {
+                throw new Error(
+                  "Could not load scenario count."
+                );
+              }
+
+              const data =
+                await response.json();
+
+              const count =
+                data.totalImages || 0;
+
+              const number =
+                card.querySelector(
+                  ".scenario-image-number"
+                );
+
+              const label =
+                card.querySelector(
+                  ".scenario-image-label"
+                );
+
+              if (number) {
+                number.textContent =
+                  String(count);
+              }
+
+              if (label) {
+                label.textContent =
+                  count === 1
+                    ? "image"
+                    : "images";
+              }
+            } catch (error) {
+              console.error(error);
+            }
+          })
+        );
+      }
+
+      loadScenarioCounts();
 
       function filterScenarios() {
         if (!(searchInput instanceof HTMLInputElement)) {
