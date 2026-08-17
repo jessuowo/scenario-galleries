@@ -74,7 +74,7 @@ function getScenarioCover(scenario) {
 </div>
 
         <p class="eyebrow">
-          FICTIONLAB ART ARCHIVE
+          FICTIONLAB VISUAL ARCHIVE
         </p>
 
         <h1>{site.name}</h1>
@@ -82,6 +82,19 @@ function getScenarioCover(scenario) {
         <p class="intro">
           {site.tagline}
         </p>
+
+        <div class="hero-creator">
+          <img
+            src={site.avatar}
+            alt=""
+            class="hero-avatar"
+          />
+
+          <div>
+            <span class="hero-by">Gallery by</span>
+            <span class="hero-name">{site.creator}</span>
+          </div>
+        </div>
       </section>
 
       <section class="scenario-section">
@@ -343,12 +356,39 @@ function getScenarioCover(scenario) {
   }
 
   .hero {
-    position: relative;  
-    max-width: 760px;
+  position: relative;
 
-    padding:
-      100px 0 90px;
-  }
+  max-width: 820px;
+
+  padding:
+    110px 0 100px;
+}
+
+.hero::before {
+  content: "";
+
+  position: absolute;
+
+  width: 520px;
+  height: 360px;
+
+  left: -150px;
+  top: 15px;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(69, 111, 255, 0.19),
+      rgba(110, 66, 210, 0.11) 45%,
+      transparent 72%
+    );
+
+  filter: blur(22px);
+
+  z-index: -1;
+}
 
   .hero-fireflies {
     position: absolute;
@@ -466,15 +506,19 @@ function getScenarioCover(scenario) {
   }
 
   .eyebrow {
-    margin: 0 0 18px;
+  margin: 0 0 18px;
 
-    color: #8d8d91;
+  color: #b2a6ff;
 
-    font-size: 0.72rem;
-    font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 750;
 
-    letter-spacing: 0.2em;
-  }
+  letter-spacing: 0.2em;
+
+  text-shadow:
+    0 0 12px
+    rgba(157, 129, 255, 0.35);
+}
 
   h1 {
     margin: 0;
@@ -515,6 +559,62 @@ function getScenarioCover(scenario) {
 
     font-size: 1.05rem;
     line-height: 1.7;
+  }
+
+  .hero-creator {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 11px;
+
+    margin-top: 28px;
+  }
+
+  .hero-avatar {
+    display: block;
+
+    width: 42px;
+    height: 42px;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    border:
+      1px solid
+      rgba(201, 185, 255, 0.42);
+
+    box-shadow:
+      0 0 18px
+      rgba(145, 115, 255, 0.2);
+  }
+
+  .hero-creator > div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+  }
+
+  .hero-by {
+    color: var(--text-muted);
+
+    font-size: 0.66rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .hero-name {
+    color: #ddd6ff;
+
+    font-size: 0.86rem;
+    font-weight: 700;
+
+    text-shadow:
+      0 0 10px
+      rgba(164, 137, 255, 0.2);
   }
 
   .scenario-section {
