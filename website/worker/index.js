@@ -115,6 +115,68 @@ async function saveGalleryMeta(
   );
 }
 
+function scenarioMetaKey(
+  scenario
+) {
+  return `_scenario-meta/${scenario}.json`;
+}
+
+async function getScenarioMeta(
+  env,
+  scenario
+) {
+  try {
+    const object =
+      await env.GALLERY_IMAGES.get(
+        scenarioMetaKey(scenario)
+      );
+
+    if (!object) {
+      return {
+        cover: null,
+      };
+    }
+
+    const data =
+      await object.json();
+
+    return {
+      cover:
+        typeof data?.cover === "string"
+          ? data.cover
+          : null,
+    };
+  } catch {
+    return {
+      cover: null,
+    };
+  }
+}
+
+async function saveScenarioMeta(
+  env,
+  scenario,
+  meta
+) {
+  await env.GALLERY_IMAGES.put(
+    scenarioMetaKey(scenario),
+
+    JSON.stringify({
+      cover:
+        typeof meta?.cover === "string"
+          ? meta.cover
+          : null,
+    }),
+
+    {
+      httpMetadata: {
+        contentType:
+          "application/json",
+      },
+    }
+  );
+}
+
 async function getGalleryOrder(
   env,
   scenario,
@@ -774,10 +836,24 @@ export default {
           )
         );
 
+        const scenarioMeta =
+          await getScenarioMeta(
+            env,
+            scenario
+          );
+
+        const scenarioCover =
+          scenarioMeta.cover
+            ? `/api/gallery-image?key=${encodeURIComponent(
+                scenarioMeta.cover
+              )}`
+            : null;
+
         return Response.json({
           success: true,
           scenario,
           totalImages: objects.length,
+          scenarioCover,
           galleries,
         });
       } catch (error) {
@@ -1035,6 +1111,120 @@ export default {
             success: false,
             message:
               "Could not save gallery cover.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
+    // Set scenario cover image
+    if (
+      url.pathname ===
+        "/api/admin/scenario-cover" &&
+      request.method === "POST"
+    ) {
+      if (!isAuthorized(request, env)) {
+        return Response.json(
+          {
+            success: false,
+            message: "Unauthorized.",
+          },
+          {
+            status: 401,
+          }
+        );
+      }
+
+      try {
+        const body =
+          await request.json();
+
+        const scenario =
+          safeSegment(
+            body?.scenario
+          );
+
+        const key = body?.key;
+
+        if (
+          !scenario ||
+          typeof key !== "string"
+        ) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Scenario and image are required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const scenarioPrefix =
+          `${scenario}/`;
+
+        // The cover can come from any gallery inside this scenario.
+        if (
+          !key.startsWith(
+            scenarioPrefix
+          )
+        ) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "That image does not belong to this scenario.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const object =
+          await env.GALLERY_IMAGES.head(
+            key
+          );
+
+        if (!object) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Scenario cover image was not found.",
+            },
+            {
+              status: 404,
+            }
+          );
+        }
+
+        await saveScenarioMeta(
+          env,
+          scenario,
+          {
+            cover: key,
+          }
+        );
+
+        return Response.json({
+          success: true,
+          message:
+            "Scenario cover updated.",
+          cover: key,
+        });
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Could not update scenario cover.",
           },
           {
             status: 500,
