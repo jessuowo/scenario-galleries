@@ -169,6 +169,27 @@ const adminScenarios = scenarios.map((scenario) => ({
               />
             </div>
 
+            <div class="crop-field">
+              <div class="crop-label">
+                <label for="scenario-cover-zoom">
+                  Zoom
+                </label>
+
+                <span id="scenario-cover-zoom-value">
+                  100%
+                </span>
+              </div>
+
+              <input
+                id="scenario-cover-zoom"
+                type="range"
+                min="1"
+                max="3"
+                step="0.05"
+                value="1"
+              />
+            </div>
+
             <button
               id="save-scenario-crop"
               class="secondary-button"
@@ -402,6 +423,16 @@ const adminScenarios = scenarios.map((scenario) => ({
       const scenarioCropYValue =
         document.getElementById(
           "scenario-crop-y-value"
+        );
+
+      const scenarioCoverZoom =
+        document.getElementById(
+          "scenario-cover-zoom"
+        );
+
+      const scenarioCoverZoomValue =
+        document.getElementById(
+          "scenario-cover-zoom-value"
         );
 
       const saveScenarioCrop =
@@ -1345,26 +1376,37 @@ const adminScenarios = scenarios.map((scenario) => ({
         const y =
           Number(scenarioCropY.value);
 
+        const zoom =
+          Number(scenarioCoverZoom.value);
+
         scenarioCropXValue.textContent =
           `${x}%`;
 
         scenarioCropYValue.textContent =
           `${y}%`;
 
-        if (cropPreviewPosition) {
-          cropPreviewPosition.textContent =
-            `${x}% × ${y}%`;
-        }
+        scenarioCoverZoomValue.textContent =
+          `${Math.round(
+            zoom * 100
+          )}%`;
 
         const previewImage =
           scenarioCoverPreview.querySelector(
             "img"
           );
 
-        if (previewImage) {
-          previewImage.style.objectPosition =
-            `${x}% ${y}%`;
+        if (!previewImage) {
+          return;
         }
+
+        previewImage.style.objectPosition =
+          `${x}% ${y}%`;
+
+        previewImage.style.transformOrigin =
+          `${x}% ${y}%`;
+
+        previewImage.style.transform =
+          `scale(${zoom})`;
       }
 
       scenarioCropX?.addEventListener(
@@ -1373,6 +1415,11 @@ const adminScenarios = scenarios.map((scenario) => ({
       );
 
       scenarioCropY?.addEventListener(
+        "input",
+        updateScenarioCropPreview
+      );
+
+      scenarioCoverZoom?.addEventListener(
         "input",
         updateScenarioCropPreview
       );
@@ -1481,13 +1528,15 @@ const adminScenarios = scenarios.map((scenario) => ({
             "";
 
           const previewImage =
-            document.createElement("img");
+            document.createElement(
+              "img"
+            );
 
           previewImage.src =
             previewUrl;
 
           previewImage.alt =
-            "Scenario cover preview";
+            "New scenario cover preview";
 
           previewImage.onload = () => {
             URL.revokeObjectURL(
@@ -1495,12 +1544,11 @@ const adminScenarios = scenarios.map((scenario) => ({
             );
           };
 
-          previewImage.style.objectPosition =
-            `${scenarioCropX.value}% ${scenarioCropY.value}%`;
-
           scenarioCoverPreview.appendChild(
             previewImage
           );
+
+          updateScenarioCropPreview();
         }
       );
 
@@ -1978,7 +2026,7 @@ const adminScenarios = scenarios.map((scenario) => ({
 
   .scenario-cover-preview {
     width: 100%;
-    max-width: 420px;
+    max-width: 560px;
 
     aspect-ratio: 16 / 10;
 
@@ -2025,6 +2073,18 @@ const adminScenarios = scenarios.map((scenario) => ({
     display: block;
 
     object-fit: cover;
+    object-position: 50% 50%;
+
+    transform: scale(1);
+    transform-origin: 50% 50%;
+
+    transition:
+      transform 0.08s linear,
+      object-position 0.08s linear;
+
+    will-change:
+      transform,
+      object-position;
   }
 
   .crop-controls {
@@ -2032,7 +2092,7 @@ const adminScenarios = scenarios.map((scenario) => ({
 
     gap: 18px;
 
-    max-width: 420px;
+    max-width: 560px;
 
     margin-top: 20px;
 
