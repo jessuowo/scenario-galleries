@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+
+  "name": "scenario-galleries",
+
+  "compatibility_date": "2026-08-17",
+
+  "assets": {
+    "directory": "./dist"
+  },
+
+  "r2_buckets": [
+    {
+      "binding": "GALLERY_IMAGES",
+      "bucket_name": "scenario-gallery-images"
+    }
+  ]
+}
