@@ -129,4 +129,81 @@ export const scenarios = [
       },
     ],
   },
+
+  {
+    title: "Torn Between Two",
+
+    slug: "torn-between-two",
+
+    description:
+      "Character artwork, locations, and visual moments from the Torn Between Two scenario.",
+
+    // Temporary fallback until you upload
+    // a dedicated scenario cover through /admin.
+    cover: "/images/site/mascot-cat.png",
+
+    fictionLabUrl: "",
+
+    galleries: [
+      {
+        title: "Theo Wilder",
+
+        slug: "theo-wilder",
+
+        type: "Character Gallery",
+
+        description:
+          "Character artwork for Theo Wilder.",
+
+        rating: "sfw",
+
+        images: [],
+      },
+
+      {
+        title: "Kai Wilder",
+
+        slug: "kai-wilder",
+
+        type: "Character Gallery",
+
+        description:
+          "Character artwork for Kai Wilder.",
+
+        rating: "sfw",
+
+        images: [],
+      },
+
+      {
+        title: "Locations",
+
+        slug: "locations",
+
+        type: "Location Gallery",
+
+        description:
+          "Locations and visual settings from Torn Between Two.",
+
+        rating: "sfw",
+
+        images: [],
+      },
+
+      {
+        title: "Story Moments",
+
+        slug: "story-moments",
+
+        type: "Story Gallery",
+
+        description:
+          "Scenes and memorable visual moments from Torn Between Two.",
+
+        rating: "sfw",
+
+        images: [],
+      },
+    ],
+  },
 ];
