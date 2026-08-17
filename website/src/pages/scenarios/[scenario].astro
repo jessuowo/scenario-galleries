@@ -62,6 +62,7 @@ const totalImages = scenario.galleries.reduce(
           {
             scenario.cover ? (
               <img
+                id="scenario-cover-image"
                 src={scenario.cover}
                 alt={`${scenario.title} cover`}
               />
@@ -222,6 +223,19 @@ const totalImages = scenario.galleries.reduce(
 
             const data =
               await response.json();
+
+            const scenarioCoverImage =
+              document.getElementById(
+                "scenario-cover-image"
+              );
+
+            if (
+              scenarioCoverImage &&
+              data.scenarioCover
+            ) {
+              scenarioCoverImage.src =
+                data.scenarioCover;
+            }
 
             // Update total scenario image count
             const totalCount =

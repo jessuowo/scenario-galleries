@@ -163,6 +163,7 @@ function getScenarioCover(scenario) {
   {
     cover ? (
       <img
+        class="scenario-cover-image"
         src={cover.src}
         alt={scenario.title}
         loading="lazy"
@@ -344,6 +345,18 @@ function getScenarioCover(scenario) {
 
         if (query === "") {
           resultsText.textContent = "";
+              const coverImage =
+                card.querySelector(
+                  ".scenario-cover-image"
+                );
+
+              if (
+                coverImage &&
+                data.scenarioCover
+              ) {
+                coverImage.src =
+                  data.scenarioCover;
+              }
           return;
         }
 
