@@ -1399,9 +1399,12 @@ const adminScenarios = scenarios.map((scenario) => ({
           return;
         }
 
+        // Keep the original cover centered.
         previewImage.style.objectPosition =
-          `${x}% ${y}%`;
+          "50% 50%";
 
+        // X/Y now control which part of the
+        // zoomed image stays in focus.
         previewImage.style.transformOrigin =
           `${x}% ${y}%`;
 
@@ -2079,8 +2082,8 @@ const adminScenarios = scenarios.map((scenario) => ({
     transform-origin: 50% 50%;
 
     transition:
-      transform 0.08s linear,
-      object-position 0.08s linear;
+      transform 0.04s linear,
+      transform-origin 0.04s linear;
 
     will-change:
       transform,
