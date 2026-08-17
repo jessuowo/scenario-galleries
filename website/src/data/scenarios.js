@@ -136,7 +136,7 @@ export const scenarios = [
     slug: "torn-between-two",
 
     description:
-      "Character artwork, locations, and visual references from the Torn Between Two scenario.",
+      "Character artwork, locations, and visual references from the scenario.",
 
     // Temporary fallback until you upload
     // a dedicated scenario cover through /admin.
