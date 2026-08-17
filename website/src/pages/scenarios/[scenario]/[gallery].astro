@@ -139,7 +139,7 @@ const {
     </div>
 
     <script>
-      const items = Array.from(
+      let items = Array.from(
         document.querySelectorAll(".gallery-item")
       );
 
@@ -276,11 +276,30 @@ const {
         return Math.hypot(x, y);
       }
 
-      items.forEach((item, index) => {
-        item.addEventListener("click", () => {
-          openViewer(index);
+      function bindGalleryItems() {
+        items = Array.from(
+          document.querySelectorAll(".gallery-item")
+        );
+
+        items.forEach((item, index) => {
+          if (item.dataset.viewerBound === "true") {
+            return;
+          }
+
+          item.dataset.viewerBound = "true";
+
+          item.addEventListener("click", () => {
+            openViewer(index);
+          });
         });
-      });
+      }
+
+      bindGalleryItems();
+
+      window.addEventListener(
+        "gallery-images-loaded",
+        bindGalleryItems
+      );
 
       close?.addEventListener(
         "click",
