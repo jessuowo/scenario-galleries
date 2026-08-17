@@ -2,7 +2,7 @@ export const site = {
   name: "FictionLab Scenario Galleries",
 
   tagline:
-    "Character artwork, locations, and visual extras from my FictionLab scenarios.",
+    "Character artwork, locations, and visual extras for my FictionLab scenarios.",
 
   creator: "jessuowo",
 
