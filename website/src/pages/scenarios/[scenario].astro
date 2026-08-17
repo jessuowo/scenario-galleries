@@ -49,7 +49,10 @@ const totalImages = scenario.galleries.reduce(
   <body>
     <SiteHeader />
 
-    <main>
+    <main
+      id="scenario-page"
+      data-scenario={scenario.slug}
+    >
       <a href="/" class="back-link">
         ← All Scenarios
       </a>
@@ -93,11 +96,11 @@ const totalImages = scenario.galleries.reduce(
             <span>•</span>
 
             <span>
-              {totalImages}
+              <span id="scenario-image-count">0</span>
               {" "}
-              {totalImages === 1
-                ? "image"
-                : "images"}
+              <span id="scenario-image-label">
+                images
+              </span>
             </span>
           </div>
 
@@ -134,34 +137,14 @@ const totalImages = scenario.galleries.reduce(
         <div class="album-grid">
           {
             scenario.galleries.map((gallery) => {
-              const cover = gallery.cover
-                ? {
-                    src: gallery.cover,
-                    alt: gallery.title,
-                  }
-                : gallery.images.length > 0
-                  ? gallery.images[0]
-                  : null;
-
               return (
                 <a
                   href={`/scenarios/${scenario.slug}/${gallery.slug}`}
                   class="album-card"
+                  data-gallery={gallery.slug}
                 >
                   <div class="album-cover">
-                    {
-                      cover ? (
-                        <img
-                          src={cover.src}
-                          alt={gallery.title}
-                          loading="lazy"
-                        />
-                      ) : (
-                        <span>
-                          No images yet
-                        </span>
-                      )
-                    }
+                    <span>Loading images...</span>
                   </div>
 
                   <div class="album-content">
@@ -191,11 +174,11 @@ const totalImages = scenario.galleries.reduce(
                     }
 
                     <p class="image-count">
-                      {gallery.images.length}
+                      <span class="album-image-number">0</span>
                       {" "}
-                      {gallery.images.length === 1
-                        ? "image"
-                        : "images"}
+                      <span class="album-image-label">
+                        images
+                      </span>
                     </p>
 
                     <span class="view-link">
@@ -211,6 +194,145 @@ const totalImages = scenario.galleries.reduce(
     </main>
 
     <SiteFooter />
+
+    <script>
+      const scenarioPage =
+        document.getElementById(
+          "scenario-page"
+        );
+
+      if (scenarioPage) {
+        const scenarioSlug =
+          scenarioPage.dataset.scenario;
+
+        async function loadScenarioSummary() {
+          try {
+            const response =
+              await fetch(
+                `/api/scenario-summary?scenario=${encodeURIComponent(
+                  scenarioSlug
+                )}`
+              );
+
+            if (!response.ok) {
+              throw new Error(
+                "Could not load scenario summary."
+              );
+            }
+
+            const data =
+              await response.json();
+
+            // Update total scenario image count
+            const totalCount =
+              document.getElementById(
+                "scenario-image-count"
+              );
+
+            const totalLabel =
+              document.getElementById(
+                "scenario-image-label"
+              );
+
+            if (totalCount) {
+              totalCount.textContent =
+                String(data.totalImages || 0);
+            }
+
+            if (totalLabel) {
+              totalLabel.textContent =
+                data.totalImages === 1
+                  ? "image"
+                  : "images";
+            }
+
+            // Update each album card
+            document
+              .querySelectorAll(
+                ".album-card[data-gallery]"
+              )
+              .forEach((card) => {
+                const gallerySlug =
+                  card.dataset.gallery;
+
+                const galleryData =
+                  data.galleries?.[
+                    gallerySlug
+                  ];
+
+                const count =
+                  galleryData?.count || 0;
+
+                const countElement =
+                  card.querySelector(
+                    ".album-image-number"
+                  );
+
+                const labelElement =
+                  card.querySelector(
+                    ".album-image-label"
+                  );
+
+                if (countElement) {
+                  countElement.textContent =
+                    String(count);
+                }
+
+                if (labelElement) {
+                  labelElement.textContent =
+                    count === 1
+                      ? "image"
+                      : "images";
+                }
+
+                const cover =
+                  card.querySelector(
+                    ".album-cover"
+                  );
+
+                if (!cover) {
+                  return;
+                }
+
+                cover.innerHTML = "";
+
+                if (galleryData?.cover) {
+                  const img =
+                    document.createElement(
+                      "img"
+                    );
+
+                  img.src =
+                    galleryData.cover;
+
+                  img.alt =
+                    card.querySelector("h3")
+                      ?.textContent ||
+                    "Gallery cover";
+
+                  img.loading = "lazy";
+
+                  cover.appendChild(img);
+                } else {
+                  const empty =
+                    document.createElement(
+                      "span"
+                    );
+
+                  empty.textContent =
+                    "No images yet";
+
+                  cover.appendChild(empty);
+                }
+              });
+          } catch (error) {
+            console.error(error);
+          }
+        }
+
+        loadScenarioSummary();
+      }
+    </script>
   </body>
 </html>
 
