@@ -219,6 +219,64 @@ export default {
       }
     }
 
+    // Delete image from R2
+    if (
+      url.pathname === "/api/admin/delete" &&
+      request.method === "DELETE"
+    ) {
+      if (!isAuthorized(request, env)) {
+        return Response.json(
+          {
+            success: false,
+            message: "Unauthorized.",
+          },
+          {
+            status: 401,
+          }
+        );
+      }
+
+      try {
+        const body = await request.json();
+        const key = body?.key;
+
+        if (
+          typeof key !== "string" ||
+          key.trim() === ""
+        ) {
+          return Response.json(
+            {
+              success: false,
+              message: "Image key is required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        await env.GALLERY_IMAGES.delete(key);
+
+        return Response.json({
+          success: true,
+          message: "Image deleted successfully.",
+          key,
+        });
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message: "Delete failed.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
