@@ -34,14 +34,14 @@ function safeFilename(filename) {
   return `${cleanBase}${extension}`;
 }
 
-function galleryOrderKey(
+function galleryMetaKey(
   scenario,
   gallery
 ) {
   return `_gallery-meta/${scenario}/${gallery}.json`;
 }
 
-async function getGalleryOrder(
+async function getGalleryMeta(
   env,
   scenario,
   gallery
@@ -49,25 +49,85 @@ async function getGalleryOrder(
   try {
     const object =
       await env.GALLERY_IMAGES.get(
-        galleryOrderKey(
+        galleryMetaKey(
           scenario,
           gallery
         )
       );
 
     if (!object) {
-      return [];
+      return {
+        order: [],
+        cover: null,
+      };
     }
 
     const data =
       await object.json();
 
-    return Array.isArray(data?.order)
-      ? data.order
-      : [];
+    return {
+      order:
+        Array.isArray(data?.order)
+          ? data.order
+          : [],
+
+      cover:
+        typeof data?.cover === "string"
+          ? data.cover
+          : null,
+    };
   } catch {
-    return [];
+    return {
+      order: [],
+      cover: null,
+    };
   }
+}
+
+async function saveGalleryMeta(
+  env,
+  scenario,
+  gallery,
+  meta
+) {
+  await env.GALLERY_IMAGES.put(
+    galleryMetaKey(
+      scenario,
+      gallery
+    ),
+    JSON.stringify({
+      order:
+        Array.isArray(meta?.order)
+          ? meta.order
+          : [],
+
+      cover:
+        typeof meta?.cover === "string"
+          ? meta.cover
+          : null,
+    }),
+    {
+      httpMetadata: {
+        contentType:
+          "application/json",
+      },
+    }
+  );
+}
+
+async function getGalleryOrder(
+  env,
+  scenario,
+  gallery
+) {
+  const meta =
+    await getGalleryMeta(
+      env,
+      scenario,
+      gallery
+    );
+
+  return meta.order;
 }
 
 function sortByGalleryOrder(
@@ -675,6 +735,41 @@ export default {
           }
         }
 
+        await Promise.all(
+          Object.keys(galleries).map(
+            async (gallerySlug) => {
+              const meta =
+                await getGalleryMeta(
+                  env,
+                  scenario,
+                  gallerySlug
+                );
+
+              if (!meta.cover) {
+                return;
+              }
+
+              const coverExists =
+                objects.some(
+                  (object) =>
+                    object.key ===
+                    meta.cover
+                );
+
+              if (!coverExists) {
+                return;
+              }
+
+              galleries[
+                gallerySlug
+              ].cover =
+                `/api/gallery-image?key=${encodeURIComponent(
+                  meta.cover
+                )}`;
+            }
+          )
+        );
+
         return Response.json({
           success: true,
           scenario,
@@ -774,19 +869,20 @@ export default {
         const uniqueKeys =
           [...new Set(validKeys)];
 
-        await env.GALLERY_IMAGES.put(
-          galleryOrderKey(
+        const currentMeta =
+          await getGalleryMeta(
+            env,
             scenario,
             gallery
-          ),
-          JSON.stringify({
-            order: uniqueKeys,
-          }),
+          );
+
+        await saveGalleryMeta(
+          env,
+          scenario,
+          gallery,
           {
-            httpMetadata: {
-              contentType:
-                "application/json",
-            },
+            ...currentMeta,
+            order: uniqueKeys,
           }
         );
 
@@ -804,6 +900,137 @@ export default {
             success: false,
             message:
               "Could not save gallery order.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
+    // Set or clear custom gallery cover
+    if (
+      url.pathname === "/api/admin/cover" &&
+      request.method === "POST"
+    ) {
+      if (!isAuthorized(request, env)) {
+        return Response.json(
+          {
+            success: false,
+            message: "Unauthorized.",
+          },
+          {
+            status: 401,
+          }
+        );
+      }
+
+      try {
+        const body =
+          await request.json();
+
+        const scenario =
+          safeSegment(
+            body?.scenario
+          );
+
+        const gallery =
+          safeSegment(
+            body?.gallery
+          );
+
+        const key =
+          body?.key ?? null;
+
+        if (!scenario || !gallery) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Scenario and gallery are required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const prefix =
+          `${scenario}/${gallery}/`;
+
+        let cover = null;
+
+        if (key !== null) {
+          if (
+            typeof key !== "string" ||
+            !key.startsWith(prefix)
+          ) {
+            return Response.json(
+              {
+                success: false,
+                message:
+                  "Invalid cover image.",
+              },
+              {
+                status: 400,
+              }
+            );
+          }
+
+          const object =
+            await env.GALLERY_IMAGES.head(
+              key
+            );
+
+          if (!object) {
+            return Response.json(
+              {
+                success: false,
+                message:
+                  "Cover image was not found.",
+              },
+              {
+                status: 404,
+              }
+            );
+          }
+
+          cover = key;
+        }
+
+        const currentMeta =
+          await getGalleryMeta(
+            env,
+            scenario,
+            gallery
+          );
+
+        await saveGalleryMeta(
+          env,
+          scenario,
+          gallery,
+          {
+            ...currentMeta,
+            cover,
+          }
+        );
+
+        return Response.json({
+          success: true,
+          message:
+            cover
+              ? "Gallery cover saved."
+              : "Gallery cover cleared.",
+          cover,
+        });
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Could not save gallery cover.",
           },
           {
             status: 500,
