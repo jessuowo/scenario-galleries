@@ -262,6 +262,30 @@ async function saveScenarioMeta(
               Math.max(1, meta.zoom)
             )
           : 1,
+
+      pageCropX:
+        Number.isFinite(meta?.pageCropX)
+          ? Math.min(
+              100,
+              Math.max(0, meta.pageCropX)
+            )
+          : 50,
+
+      pageCropY:
+        Number.isFinite(meta?.pageCropY)
+          ? Math.min(
+              100,
+              Math.max(0, meta.pageCropY)
+            )
+          : 50,
+
+      pageZoom:
+        Number.isFinite(meta?.pageZoom)
+          ? Math.min(
+              3,
+              Math.max(1, meta.pageZoom)
+            )
+          : 1,
     }),
 
     {
