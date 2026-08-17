@@ -73,11 +73,9 @@ const {
         </div>
 
         <div class="count">
-          {gallery.images.length}
-          <span>
-            {gallery.images.length === 1
-              ? "image"
-              : "images"}
+          <strong id="gallery-count">0</strong>
+          <span id="gallery-count-label">
+            images
           </span>
         </div>
       </section>
@@ -651,6 +649,16 @@ const {
           galleryGrid.dataset.galleryTitle ||
           "Gallery";
 
+        const galleryCount =
+          document.getElementById(
+            "gallery-count"
+          );
+
+        const galleryCountLabel =
+          document.getElementById(
+            "gallery-count-label"
+          );
+
         async function loadGalleryImages() {
           try {
             const response = await fetch(
@@ -669,6 +677,21 @@ const {
 
             const data =
               await response.json();
+
+            const imageCount =
+              data.images?.length || 0;
+
+            if (galleryCount) {
+              galleryCount.textContent =
+                String(imageCount);
+            }
+
+            if (galleryCountLabel) {
+              galleryCountLabel.textContent =
+                imageCount === 1
+                  ? "image"
+                  : "images";
+            }
 
             galleryGrid.innerHTML = "";
 
@@ -699,6 +722,14 @@ const {
 
                 button.dataset.index =
                   String(index);
+
+                button.dataset.src =
+                  image.url;
+
+                button.dataset.alt =
+                  `${galleryTitle} image ${
+                    index + 1
+                  }`;
 
                 const img =
                   document.createElement(
@@ -904,6 +935,11 @@ const {
   text-shadow:
     0 0 14px
     rgba(145, 119, 255, 0.16);
+}
+
+.count strong {
+  font: inherit;
+  font-weight: inherit;
 }
 
 .count span {
