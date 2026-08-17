@@ -1,6 +1,10 @@
 ---
 import { scenarios } from "../../data/scenarios.js";
+import { site } from "../../data/site.js";
 import "../../styles/theme.css";
+
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
 
 export function getStaticPaths() {
   return scenarios.map((scenario) => ({
@@ -43,17 +47,7 @@ const totalImages = scenario.galleries.reduce(
   </head>
 
   <body>
-    <header class="site-header">
-      <a href="/" class="logo">
-        SCENARIO GALLERIES
-      </a>
-
-      <nav>
-        <a href="/">
-          Scenarios
-        </a>
-      </nav>
-    </header>
+    <SiteHeader />
 
     <main>
       <a href="/" class="back-link">
@@ -216,9 +210,7 @@ const totalImages = scenario.galleries.reduce(
       </section>
     </main>
 
-    <footer>
-      <p>Scenario Galleries</p>
-    </footer>
+    <SiteFooter />
   </body>
 </html>
 
@@ -251,36 +243,6 @@ const totalImages = scenario.galleries.reduce(
   a {
     color: inherit;
     text-decoration: none;
-  }
-
-  .site-header {
-    width: min(
-      1200px,
-      calc(100% - 40px)
-    );
-
-    min-height: 76px;
-
-    margin: 0 auto;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    border-bottom:
-      1px solid #252527;
-  }
-
-  .logo {
-    font-size: 0.83rem;
-    font-weight: 800;
-
-    letter-spacing: 0.16em;
-  }
-
-  nav a {
-    color: #9a9a9f;
-    font-size: 0.9rem;
   }
 
   main {
@@ -697,24 +659,6 @@ const totalImages = scenario.galleries.reduce(
     rgba(161, 132, 255, 0.22);
   }
 
-  footer {
-    width: min(
-      1200px,
-      calc(100% - 40px)
-    );
-
-    margin: 0 auto;
-
-    padding: 28px 0 50px;
-
-    border-top:
-      1px solid #252527;
-
-    color: #68686d;
-
-    font-size: 0.8rem;
-  }
-
   @media (max-width: 850px) {
     .scenario-hero {
       grid-template-columns: 1fr;
@@ -732,17 +676,8 @@ const totalImages = scenario.galleries.reduce(
   }
 
   @media (max-width: 600px) {
-    .site-header,
-    main,
-    footer {
-      width: calc(100% - 28px);
-    }
-
-    .site-header {
-      min-height: 66px;
-    }
-
     main {
+      width: calc(100% - 28px);
       padding-top: 28px;
     }
 

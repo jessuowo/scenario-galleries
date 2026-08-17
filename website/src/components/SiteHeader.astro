@@ -1,0 +1,159 @@
+---
+import { site } from "../data/site.js";
+---
+
+<header class="site-header">
+  <a href="/" class="logo">
+    {site.name}
+  </a>
+
+  <nav class="header-actions">
+    <a href="/" class="nav-link">
+      Scenarios
+    </a>
+
+    <a href="/" class="creator-badge">
+      <img
+        src={site.avatar}
+        alt={`${site.creator} avatar`}
+        class="creator-avatar"
+      />
+
+      <span>{site.creator}</span>
+    </a>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    width: min(1200px, calc(100% - 40px));
+    min-height: 76px;
+
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border-bottom:
+      1px solid var(--border-soft);
+  }
+
+  .logo {
+    color: var(--text-main);
+    text-decoration: none;
+
+    font-size: 0.83rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .nav-link {
+    color: var(--text-muted);
+    text-decoration: none;
+
+    font-size: 0.88rem;
+
+    transition:
+      color 0.2s ease,
+      text-shadow 0.2s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--text-main);
+
+    text-shadow:
+      0 0 12px
+      rgba(164, 135, 255, 0.4);
+  }
+
+  .creator-badge {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 6px 11px 6px 6px;
+
+    border:
+      1px solid var(--border-soft);
+
+    border-radius: 999px;
+
+    background:
+      rgba(8, 19, 48, 0.58);
+
+    backdrop-filter: blur(12px);
+
+    color: var(--text-soft);
+    text-decoration: none;
+
+    font-size: 0.82rem;
+    font-weight: 600;
+
+    transition:
+      border-color 0.25s ease,
+      box-shadow 0.25s ease,
+      background 0.25s ease;
+  }
+
+  .creator-badge:hover {
+    border-color:
+      rgba(174, 147, 255, 0.48);
+
+    background:
+      rgba(16, 28, 67, 0.75);
+
+    box-shadow:
+      0 0 22px
+      rgba(133, 104, 255, 0.15);
+  }
+
+  .creator-avatar {
+    display: block;
+
+    width: 40px;
+    height: 40px;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    border:
+      1px solid
+      rgba(195, 183, 255, 0.4);
+
+    box-shadow:
+      0 0 12px
+      rgba(144, 123, 255, 0.18);
+  }
+
+  @media (max-width: 600px) {
+    .site-header {
+      width: calc(100% - 28px);
+      min-height: 66px;
+    }
+
+    .header-actions {
+      gap: 10px;
+    }
+
+    .nav-link {
+      display: none;
+    }
+
+    .creator-badge {
+      padding: 4px 8px 4px 4px;
+    }
+
+    .creator-avatar {
+      width: 36px;
+      height: 36px;
+    }
+  }
+</style>

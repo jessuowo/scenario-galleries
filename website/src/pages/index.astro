@@ -3,6 +3,9 @@ import { scenarios } from "../data/scenarios.js";
 import { site } from "../data/site.js";
 import "../styles/theme.css";
 
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+
 function getScenarioImageCount(scenario) {
   return scenario.galleries.reduce(
     (total, gallery) => total + gallery.images.length,
@@ -40,27 +43,7 @@ function getScenarioCover(scenario) {
   </head>
 
   <body>
-    <header class="site-header">
-      <a href="/" class="logo">
-        {site.name}
-      </a>
-
-      <nav class="header-actions">
-        <a href="/" class="nav-link">
-          Scenarios
-        </a>
-
-        <div class="creator-badge">
-          <img
-            src={site.avatar}
-            alt={`${site.creator} avatar`}
-            class="creator-avatar"
-          />
-
-          <span>{site.creator}</span>
-        </div>
-      </nav>
-    </header>
+    <SiteHeader />
 
     <main>
       <section class="hero">
@@ -193,29 +176,7 @@ function getScenarioCover(scenario) {
       </section>
     </main>
 
-    <footer class="site-footer">
-  <div class="footer-left">
-    <img
-      src={site.mascot}
-      alt=""
-      class="footer-cat"
-    />
-
-    <div>
-      <p class="footer-name">
-        {site.name}
-      </p>
-
-      <p class="footer-credit">
-        Gallery by {site.creator}
-      </p>
-    </div>
-  </div>
-
-  <p class="footer-note">
-    ✦ made with stories, starlight & cat supervision
-  </p>
-</footer>
+    <SiteFooter />
   </body>
 </html>
 
@@ -248,122 +209,6 @@ function getScenarioCover(scenario) {
   a {
     color: inherit;
     text-decoration: none;
-  }
-
-  .site-header {
-    width: min(
-      1200px,
-      calc(100% - 40px)
-    );
-
-    min-height: 76px;
-
-    margin: 0 auto;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    border-bottom:
-      1px solid #252527;
-  }
-
-  .logo {
-    font-size: 0.83rem;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-  }
-
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .nav-link {
-    color: var(--text-muted);
-
-    font-size: 0.88rem;
-
-    transition:
-      color 0.2s ease,
-      text-shadow 0.2s ease;
-  }
-
-  .nav-link:hover {
-    color: var(--text-main);
-
-    text-shadow:
-      0 0 12px
-      rgba(164, 135, 255, 0.4);
-  }
-
-  .creator-badge {
-    display: flex;
-    align-items: center;
-
-    gap: 9px;
-
-    padding:
-      6px 11px 6px 6px;
-
-    border:
-      1px solid
-      var(--border-soft);
-
-    border-radius: 999px;
-
-    background:
-      rgba(8, 19, 48, 0.58);
-
-    backdrop-filter:
-      blur(12px);
-
-    color:
-      var(--text-soft);
-
-    font-size: 0.82rem;
-    font-weight: 600;
-
-    box-shadow:
-      0 0 0
-      rgba(159, 126, 255, 0);
-
-    transition:
-      border-color 0.25s ease,
-      box-shadow 0.25s ease,
-      background 0.25s ease;
-  }
-
-  .creator-badge:hover {
-    border-color:
-      rgba(174, 147, 255, 0.48);
-
-    background:
-      rgba(16, 28, 67, 0.75);
-
-    box-shadow:
-      0 0 22px
-      rgba(133, 104, 255, 0.15);
-  }
-
-  .creator-avatar {
-    display: block;
-
-    width: 32px;
-    height: 32px;
-
-    object-fit: cover;
-
-    border-radius: 50%;
-
-    border:
-      1px solid
-      rgba(195, 183, 255, 0.4);
-
-    box-shadow:
-      0 0 12px
-      rgba(144, 123, 255, 0.18);
   }
 
   main {
@@ -892,75 +737,6 @@ function getScenarioCover(scenario) {
     rgba(161, 132, 255, 0.22);
 }
 
-  .site-footer {
-    width: min(
-      1200px,
-      calc(100% - 40px)
-    );
-
-    margin: 0 auto;
-
-    padding: 46px 0 58px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 36px;
-
-    border-top:
-      1px solid var(--border-soft);
-  }
-
-  .footer-left {
-    display: flex;
-    align-items: center;
-
-    gap: 18px;
-  }
-
-  .footer-cat {
-    display: block;
-
-    width: 82px;
-    height: 82px;
-
-    object-fit: contain;
-
-    filter:
-      drop-shadow(
-        0 0 18px
-        rgba(147, 120, 255, 0.3)
-      );
-  }
-
-  .footer-name {
-    margin: 0;
-
-    color: var(--text-soft);
-
-    font-size: 1.05rem;
-    font-weight: 750;
-  }
-
-  .footer-credit {
-    margin: 5px 0 0;
-
-    color: var(--text-muted);
-
-    font-size: 0.86rem;
-  }
-
-  .footer-note {
-    margin: 0;
-
-    color: var(--text-muted);
-
-    font-size: 0.86rem;
-
-    letter-spacing: 0.04em;
-  }
-
   @media (max-width: 850px) {
     .scenario-grid {
       grid-template-columns:
@@ -969,14 +745,8 @@ function getScenarioCover(scenario) {
   }
 
   @media (max-width: 600px) {
-    .site-header,
-    main,
-    footer {
+    main {
       width: calc(100% - 28px);
-    }
-
-    .site-header {
-      min-height: 66px;
     }
 
     .hero {
@@ -986,28 +756,6 @@ function getScenarioCover(scenario) {
 
     .scenario-grid {
       grid-template-columns: 1fr;
-    }
-
-    .header-actions {
-      gap: 10px;
-    }
-
-    .nav-link {
-      display: none;
-    }
-
-    .creator-badge {
-      padding:
-        4px 8px 4px 4px;
-    }
-
-    .creator-avatar {
-      width: 30px;
-      height: 30px;
-    }
-
-    .creator-badge span {
-      font-size: 0.76rem;
     }
 
     .firefly-2,
@@ -1034,35 +782,6 @@ function getScenarioCover(scenario) {
 
     .hero-creator {
       gap: 16px;
-    }
-
-    .site-footer {
-      width: calc(100% - 28px);
-
-      flex-direction: column;
-      align-items: flex-start;
-
-      gap: 22px;
-
-      padding: 38px 0 46px;
-    }
-
-    .footer-cat {
-      width: 72px;
-      height: 72px;
-    }
-
-    .footer-name {
-      font-size: 1rem;
-    }
-
-    .footer-credit,
-    .footer-note {
-      font-size: 0.82rem;
-    }
-
-    .footer-note {
-      max-width: 320px;
     }
   }
 </style>

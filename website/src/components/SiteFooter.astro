@@ -1,0 +1,120 @@
+---
+import { site } from "../data/site.js";
+---
+
+<footer class="site-footer">
+  <div class="footer-left">
+    <img
+      src={site.mascot}
+      alt=""
+      class="footer-cat"
+    />
+
+    <div>
+      <p class="footer-name">
+        {site.name}
+      </p>
+
+      <p class="footer-credit">
+        Gallery by {site.creator}
+      </p>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    ✦ made with stories, starlight & cat supervision
+  </p>
+</footer>
+
+<style>
+  .site-footer {
+    width: min(1200px, calc(100% - 40px));
+
+    margin: 0 auto;
+
+    padding: 46px 0 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 36px;
+
+    border-top:
+      1px solid var(--border-soft);
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .footer-cat {
+    display: block;
+
+    width: 82px;
+    height: 82px;
+
+    object-fit: contain;
+
+    filter:
+      drop-shadow(
+        0 0 18px
+        rgba(147, 120, 255, 0.3)
+      );
+  }
+
+  .footer-name {
+    margin: 0;
+
+    color: var(--text-soft);
+
+    font-size: 1.05rem;
+    font-weight: 750;
+  }
+
+  .footer-credit {
+    margin: 5px 0 0;
+
+    color: var(--text-muted);
+
+    font-size: 0.86rem;
+  }
+
+  .footer-note {
+    margin: 0;
+
+    color: var(--text-muted);
+
+    font-size: 0.86rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 600px) {
+    .site-footer {
+      width: calc(100% - 28px);
+
+      flex-direction: column;
+      align-items: flex-start;
+
+      gap: 22px;
+
+      padding: 38px 0 46px;
+    }
+
+    .footer-cat {
+      width: 72px;
+      height: 72px;
+    }
+
+    .footer-name {
+      font-size: 1rem;
+    }
+
+    .footer-credit,
+    .footer-note {
+      font-size: 0.82rem;
+    }
+  }
+</style>
