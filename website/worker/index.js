@@ -607,6 +607,12 @@ export default {
                 )}`
               : null,
 
+          scenarioCropX:
+            scenarioMeta.cropX,
+
+          scenarioCropY:
+            scenarioMeta.cropY,
+
           images,
         });
       } catch (error) {

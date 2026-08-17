@@ -112,6 +112,58 @@ const adminScenarios = scenarios.map((scenario) => ({
             <span>No scenario cover</span>
           </div>
 
+          <div class="crop-controls">
+            <div class="crop-field">
+              <div class="crop-label">
+                <label for="scenario-crop-x">
+                  Horizontal Position
+                </label>
+
+                <span id="scenario-crop-x-value">
+                  50%
+                </span>
+              </div>
+
+              <input
+                id="scenario-crop-x"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="50"
+              />
+            </div>
+
+            <div class="crop-field">
+              <div class="crop-label">
+                <label for="scenario-crop-y">
+                  Vertical Position
+                </label>
+
+                <span id="scenario-crop-y-value">
+                  50%
+                </span>
+              </div>
+
+              <input
+                id="scenario-crop-y"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="50"
+              />
+            </div>
+
+            <button
+              id="save-scenario-crop"
+              class="secondary-button"
+              type="button"
+            >
+              Save Crop Position
+            </button>
+          </div>
+
           <div class="scenario-cover-upload">
             <label
               class="secondary-button scenario-cover-picker"
@@ -313,6 +365,31 @@ const adminScenarios = scenarios.map((scenario) => ({
           "scenario-cover-status"
         );
 
+      const scenarioCropX =
+        document.getElementById(
+          "scenario-crop-x"
+        );
+
+      const scenarioCropY =
+        document.getElementById(
+          "scenario-crop-y"
+        );
+
+      const scenarioCropXValue =
+        document.getElementById(
+          "scenario-crop-x-value"
+        );
+
+      const scenarioCropYValue =
+        document.getElementById(
+          "scenario-crop-y-value"
+        );
+
+      const saveScenarioCrop =
+        document.getElementById(
+          "save-scenario-crop"
+        );
+
       const saveOrderButton =
         document.getElementById(
           "save-order-button"
@@ -489,6 +566,32 @@ const adminScenarios = scenarios.map((scenario) => ({
           const currentScenarioCoverUrl =
             data.scenarioCoverUrl || null;
 
+          const currentCropX =
+            Number.isFinite(
+              data.scenarioCropX
+            )
+              ? data.scenarioCropX
+              : 50;
+
+          const currentCropY =
+            Number.isFinite(
+              data.scenarioCropY
+            )
+              ? data.scenarioCropY
+              : 50;
+
+          scenarioCropX.value =
+            String(currentCropX);
+
+          scenarioCropY.value =
+            String(currentCropY);
+
+          scenarioCropXValue.textContent =
+            `${currentCropX}%`;
+
+          scenarioCropYValue.textContent =
+            `${currentCropY}%`;
+
           scenarioCoverPreview.innerHTML = "";
 
           if (currentScenarioCoverUrl) {
@@ -502,6 +605,9 @@ const adminScenarios = scenarios.map((scenario) => ({
 
             coverImage.alt =
               "Current scenario cover";
+
+            coverImage.style.objectPosition =
+              `${currentCropX}% ${currentCropY}%`;
 
             scenarioCoverPreview.appendChild(
               coverImage
@@ -1698,6 +1804,64 @@ const adminScenarios = scenarios.map((scenario) => ({
     display: block;
 
     object-fit: cover;
+  }
+
+  .crop-controls {
+    display: grid;
+
+    gap: 18px;
+
+    max-width: 420px;
+
+    margin-top: 20px;
+
+    padding: 18px;
+
+    border:
+      1px solid var(--border-soft);
+
+    border-radius: 12px;
+
+    background:
+      rgba(5, 11, 31, 0.45);
+  }
+
+  .crop-field {
+    display: grid;
+
+    gap: 9px;
+  }
+
+  .crop-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    color: var(--text-soft);
+
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .crop-label span {
+    color: #b9afff;
+
+    font-variant-numeric:
+      tabular-nums;
+  }
+
+  .crop-field input[type="range"] {
+    width: 100%;
+
+    cursor: pointer;
+
+    accent-color: #8e7bea;
+  }
+
+  .crop-controls .secondary-button {
+    justify-self: start;
   }
 
   .scenario-cover-upload {
