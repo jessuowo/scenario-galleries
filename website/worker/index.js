@@ -172,6 +172,45 @@ async function getScenarioMeta(
               Math.max(1, data.zoom)
             )
           : 1,
+
+      pageCropX:
+        Number.isFinite(data?.pageCropX)
+          ? Math.min(
+              100,
+              Math.max(0, data.pageCropX)
+            )
+          : Number.isFinite(data?.cropX)
+            ? Math.min(
+                100,
+                Math.max(0, data.cropX)
+              )
+            : 50,
+
+      pageCropY:
+        Number.isFinite(data?.pageCropY)
+          ? Math.min(
+              100,
+              Math.max(0, data.pageCropY)
+            )
+          : Number.isFinite(data?.cropY)
+            ? Math.min(
+                100,
+                Math.max(0, data.cropY)
+              )
+            : 50,
+
+      pageZoom:
+        Number.isFinite(data?.pageZoom)
+          ? Math.min(
+              3,
+              Math.max(1, data.pageZoom)
+            )
+          : Number.isFinite(data?.zoom)
+            ? Math.min(
+                3,
+                Math.max(1, data.zoom)
+              )
+            : 1,
     };
   } catch {
     return {
@@ -179,6 +218,9 @@ async function getScenarioMeta(
       cropX: 50,
       cropY: 50,
       zoom: 1,
+      pageCropX: 50,
+      pageCropY: 50,
+      pageZoom: 1,
     };
   }
 }
@@ -633,6 +675,15 @@ export default {
 
           scenarioZoom:
             scenarioMeta.zoom,
+
+          scenarioPageCropX:
+            scenarioMeta.pageCropX,
+
+          scenarioPageCropY:
+            scenarioMeta.pageCropY,
+
+          scenarioPageZoom:
+            scenarioMeta.pageZoom,
 
           images,
         });
