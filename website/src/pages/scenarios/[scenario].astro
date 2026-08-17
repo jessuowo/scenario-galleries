@@ -229,12 +229,28 @@ const totalImages = scenario.galleries.reduce(
                 "scenario-cover-image"
               );
 
-            if (
-              scenarioCoverImage &&
-              data.scenarioCover
-            ) {
-              scenarioCoverImage.src =
-                data.scenarioCover;
+            if (scenarioCoverImage) {
+              if (data.scenarioCover) {
+                scenarioCoverImage.src =
+                  data.scenarioCover;
+              }
+
+              const cropX =
+                Number.isFinite(
+                  data.scenarioCropX
+                )
+                  ? data.scenarioCropX
+                  : 50;
+
+              const cropY =
+                Number.isFinite(
+                  data.scenarioCropY
+                )
+                  ? data.scenarioCropY
+                  : 50;
+
+              scenarioCoverImage.style.objectPosition =
+                `${cropX}% ${cropY}%`;
             }
 
             // Update total scenario image count

@@ -301,12 +301,28 @@ function getScenarioCover(scenario) {
                   ".scenario-cover-image"
                 );
 
-              if (
-                coverImage &&
-                data.scenarioCover
-              ) {
-                coverImage.src =
-                  data.scenarioCover;
+              if (coverImage) {
+                if (data.scenarioCover) {
+                  coverImage.src =
+                    data.scenarioCover;
+                }
+
+                const cropX =
+                  Number.isFinite(
+                    data.scenarioCropX
+                  )
+                    ? data.scenarioCropX
+                    : 50;
+
+                const cropY =
+                  Number.isFinite(
+                    data.scenarioCropY
+                  )
+                    ? data.scenarioCropY
+                    : 50;
+
+                coverImage.style.objectPosition =
+                  `${cropX}% ${cropY}%`;
               }
             } catch (error) {
               console.error(error);
