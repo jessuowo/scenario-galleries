@@ -1314,6 +1314,119 @@ const adminScenarios = scenarios.map((scenario) => ({
         loadImages
       );
 
+      function updateScenarioCropPreview() {
+        const x =
+          Number(scenarioCropX.value);
+
+        const y =
+          Number(scenarioCropY.value);
+
+        scenarioCropXValue.textContent =
+          `${x}%`;
+
+        scenarioCropYValue.textContent =
+          `${y}%`;
+
+        const previewImage =
+          scenarioCoverPreview.querySelector(
+            "img"
+          );
+
+        if (previewImage) {
+          previewImage.style.objectPosition =
+            `${x}% ${y}%`;
+        }
+      }
+
+      scenarioCropX?.addEventListener(
+        "input",
+        updateScenarioCropPreview
+      );
+
+      scenarioCropY?.addEventListener(
+        "input",
+        updateScenarioCropPreview
+      );
+
+      saveScenarioCrop?.addEventListener(
+        "click",
+        async () => {
+          if (!adminToken) {
+            return;
+          }
+
+          const cropX =
+            Number(scenarioCropX.value);
+
+          const cropY =
+            Number(scenarioCropY.value);
+
+          saveScenarioCrop.disabled =
+            true;
+
+          saveScenarioCrop.textContent =
+            "Saving...";
+
+          scenarioCoverStatus.textContent =
+            "Saving crop position...";
+
+          try {
+            const response =
+              await fetch(
+                "/api/admin/scenario-cover-crop",
+                {
+                  method: "POST",
+
+                  headers: {
+                    Authorization:
+                      `Bearer ${adminToken}`,
+
+                    "Content-Type":
+                      "application/json",
+                  },
+
+                  body:
+                    JSON.stringify({
+                      scenario:
+                        scenarioSelect.value,
+
+                      cropX,
+                      cropY,
+                    }),
+                }
+              );
+
+            if (!response.ok) {
+              const data =
+                await response.json();
+
+              throw new Error(
+                data.message ||
+                  "Could not save crop."
+              );
+            }
+
+            scenarioCoverStatus.textContent =
+              `Crop saved at ${cropX}% × ${cropY}%.`;
+
+            saveScenarioCrop.textContent =
+              "Save Crop Position";
+
+            await loadImages();
+          } catch (error) {
+            scenarioCoverStatus.textContent =
+              error.message ||
+              "Could not save crop position.";
+
+            saveScenarioCrop.textContent =
+              "Save Crop Position";
+          } finally {
+            saveScenarioCrop.disabled =
+              false;
+          }
+        }
+      );
+
       scenarioCoverFile?.addEventListener(
         "change",
         () => {

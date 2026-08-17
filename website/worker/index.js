@@ -1278,6 +1278,7 @@ export default {
           env,
           scenario,
           {
+            ...currentMeta,
             cover: key,
           }
         );
