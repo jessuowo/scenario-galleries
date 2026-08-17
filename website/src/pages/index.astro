@@ -14,13 +14,26 @@ function getScenarioImageCount(scenario) {
 }
 
 function getScenarioCover(scenario) {
+  // Use the scenario's fallback cover first.
+  // The browser will replace this with the
+  // R2 scenario cover when one exists.
+  if (scenario.cover) {
+    return {
+      src: scenario.cover,
+      alt: scenario.title,
+    };
+  }
+
   for (const gallery of scenario.galleries) {
     if (gallery.images.length > 0) {
       return gallery.images[0];
     }
   }
 
-  return null;
+  return {
+    src: "/images/site/mascot-cat.png",
+    alt: scenario.title,
+  };
 }
 ---
 
