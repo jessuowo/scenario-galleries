@@ -1,0 +1,606 @@
+---
+import { scenarios } from "../../../data/scenarios.js";
+
+export function getStaticPaths() {
+  return scenarios.flatMap((scenario) =>
+    scenario.galleries.map((gallery) => ({
+      params: {
+        scenario: scenario.slug,
+        gallery: gallery.slug,
+      },
+
+      props: {
+        scenarioTitle: scenario.title,
+        scenarioSlug: scenario.slug,
+        gallery,
+      },
+    }))
+  );
+}
+
+const {
+  scenarioTitle,
+  scenarioSlug,
+  gallery,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
+    <title>{gallery.title} | Scenario Galleries</title>
+  </head>
+
+  <body>
+    <header class="site-header">
+      <a href="/" class="logo">
+        SCENARIO GALLERIES
+      </a>
+
+      <a href={`/scenarios/${scenarioSlug}`}>
+        Scenario
+      </a>
+    </header>
+
+    <main>
+      <div class="breadcrumbs">
+        <a href="/">Scenarios</a>
+        <span>/</span>
+
+        <a href={`/scenarios/${scenarioSlug}`}>
+          {scenarioTitle}
+        </a>
+
+        <span>/</span>
+        <span>{gallery.title}</span>
+      </div>
+
+      <section class="gallery-header">
+        <div>
+          <p class="eyebrow">
+            {gallery.type.toUpperCase()}
+          </p>
+
+          <h1>{gallery.title}</h1>
+        </div>
+
+        <div class="count">
+          {gallery.images.length}
+          <span>
+            {gallery.images.length === 1
+              ? "image"
+              : "images"}
+          </span>
+        </div>
+      </section>
+
+      {
+        gallery.images.length > 0 ? (
+          <section class="gallery">
+            {gallery.images.map((image, index) => (
+              <button
+                class="gallery-item"
+                type="button"
+                data-index={index}
+                data-src={image.src}
+                data-alt={image.alt}
+                aria-label={`Open image ${index + 1}`}
+              >
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  loading="lazy"
+                />
+              </button>
+            ))}
+          </section>
+        ) : (
+          <section class="empty-gallery">
+            <p>No images have been added to this album yet.</p>
+          </section>
+        )
+      }
+    </main>
+
+    <div
+      class="viewer"
+      id="viewer"
+      aria-hidden="true"
+    >
+      <button
+        id="close"
+        class="close"
+        type="button"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+      <button
+        id="previous"
+        class="arrow previous"
+        type="button"
+        aria-label="Previous image"
+      >
+        ‹
+      </button>
+
+      <div class="viewer-content">
+        <img
+          id="viewer-image"
+          src=""
+          alt=""
+        />
+
+        <p id="counter"></p>
+      </div>
+
+      <button
+        id="next"
+        class="arrow next"
+        type="button"
+        aria-label="Next image"
+      >
+        ›
+      </button>
+    </div>
+
+    <script>
+      const items = Array.from(
+        document.querySelectorAll(".gallery-item")
+      );
+
+      const viewer =
+        document.getElementById("viewer");
+
+      const viewerImage =
+        document.getElementById("viewer-image");
+
+      const counter =
+        document.getElementById("counter");
+
+      const close =
+        document.getElementById("close");
+
+      const previous =
+        document.getElementById("previous");
+
+      const next =
+        document.getElementById("next");
+
+      let currentIndex = 0;
+
+      function showImage(index) {
+        const item = items[index];
+
+        if (!item) return;
+
+        currentIndex = index;
+
+        viewerImage.src =
+          item.dataset.src || "";
+
+        viewerImage.alt =
+          item.dataset.alt || "Gallery image";
+
+        counter.textContent =
+          `${index + 1} / ${items.length}`;
+      }
+
+      function openViewer(index) {
+        showImage(index);
+
+        viewer.classList.add("open");
+
+        viewer.setAttribute(
+          "aria-hidden",
+          "false"
+        );
+
+        document.body.classList.add(
+          "viewer-open"
+        );
+      }
+
+      function closeViewer() {
+        viewer.classList.remove("open");
+
+        viewer.setAttribute(
+          "aria-hidden",
+          "true"
+        );
+
+        document.body.classList.remove(
+          "viewer-open"
+        );
+      }
+
+      function nextImage() {
+        showImage(
+          (currentIndex + 1) % items.length
+        );
+      }
+
+      function previousImage() {
+        showImage(
+          (currentIndex - 1 + items.length) %
+            items.length
+        );
+      }
+
+      items.forEach((item, index) => {
+        item.addEventListener("click", () => {
+          openViewer(index);
+        });
+      });
+
+      close?.addEventListener(
+        "click",
+        closeViewer
+      );
+
+      next?.addEventListener(
+        "click",
+        nextImage
+      );
+
+      previous?.addEventListener(
+        "click",
+        previousImage
+      );
+
+      document.addEventListener(
+        "keydown",
+        (event) => {
+          if (
+            !viewer?.classList.contains("open")
+          ) {
+            return;
+          }
+
+          if (event.key === "Escape") {
+            closeViewer();
+          }
+
+          if (event.key === "ArrowRight") {
+            nextImage();
+          }
+
+          if (event.key === "ArrowLeft") {
+            previousImage();
+          }
+        }
+      );
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: dark;
+    font-family:
+      Inter,
+      system-ui,
+      sans-serif;
+
+    background: #0b0b0c;
+    color: white;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #0b0b0c;
+  }
+
+  body.viewer-open {
+    overflow: hidden;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font: inherit;
+  }
+
+  .site-header {
+    width: min(1400px, calc(100% - 40px));
+    min-height: 72px;
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border-bottom: 1px solid #29292c;
+  }
+
+  .site-header > a:last-child {
+    color: #99999e;
+    font-size: 0.9rem;
+  }
+
+  .logo {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+  }
+
+  main {
+    width: min(1400px, calc(100% - 40px));
+    margin: 0 auto;
+  }
+
+  .breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    padding-top: 30px;
+
+    color: #747479;
+    font-size: 0.78rem;
+  }
+
+  .gallery-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 40px;
+
+    padding: 65px 0 45px;
+  }
+
+  .eyebrow {
+    margin: 0 0 12px;
+
+    color: #77777d;
+    font-size: 0.68rem;
+    font-weight: 700;
+
+    letter-spacing: 0.16em;
+  }
+
+  h1 {
+    margin: 0;
+
+    font-size: clamp(
+      3rem,
+      7vw,
+      6rem
+    );
+
+    line-height: 0.95;
+
+    letter-spacing: -0.05em;
+  }
+
+  .count {
+    font-size: 2.4rem;
+    font-weight: 700;
+
+    text-align: right;
+  }
+
+  .count span {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #707075;
+    font-size: 0.65rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  /* Phone-style thumbnail gallery */
+
+  .gallery {
+    display: grid;
+
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+
+    gap: 5px;
+
+    padding-bottom: 100px;
+  }
+
+  .gallery-item {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 0;
+    background: #18181a;
+
+    cursor: pointer;
+  }
+
+  .gallery-item img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .gallery-item:hover img {
+    opacity: 0.85;
+    transform: scale(1.015);
+  }
+
+  .empty-gallery {
+    min-height: 320px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-top: 1px solid #242426;
+
+    color: #77777c;
+  }
+
+  /* Full-screen photo viewer */
+
+  .viewer {
+    position: fixed;
+    inset: 0;
+
+    z-index: 9999;
+
+    display: none;
+
+    width: 100vw;
+    height: 100vh;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #000;
+  }
+
+  .viewer.open {
+    display: flex;
+  }
+
+  .viewer-content {
+    width: 100%;
+    height: 100%;
+
+    padding: 55px 65px 40px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #viewer-image {
+    display: block;
+
+    max-width: 100%;
+    max-height: calc(100vh - 105px);
+
+    width: auto;
+    height: auto;
+
+    object-fit: contain;
+  }
+
+  #counter {
+    margin: 12px 0 0;
+
+    color: #888;
+    font-size: 0.75rem;
+  }
+
+  .close {
+    position: fixed;
+    top: 14px;
+    right: 18px;
+
+    z-index: 10001;
+
+    width: 48px;
+    height: 48px;
+
+    border: 0;
+
+    background: transparent;
+    color: white;
+
+    font-size: 2rem;
+
+    cursor: pointer;
+  }
+
+  .arrow {
+    position: fixed;
+    top: 50%;
+
+    z-index: 10001;
+
+    width: 55px;
+    height: 90px;
+
+    transform: translateY(-50%);
+
+    border: 0;
+
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+
+    font-size: 3rem;
+
+    cursor: pointer;
+  }
+
+  .arrow:hover {
+    color: white;
+  }
+
+  .previous {
+    left: 5px;
+  }
+
+  .next {
+    right: 5px;
+  }
+
+  @media (max-width: 600px) {
+    .site-header,
+    main {
+      width: calc(100% - 24px);
+    }
+
+    .gallery-header {
+      display: block;
+      padding: 45px 0 35px;
+    }
+
+    .count {
+      margin-top: 25px;
+      text-align: left;
+    }
+
+    .gallery {
+      grid-template-columns:
+        repeat(3, 1fr);
+
+      gap: 3px;
+    }
+
+    .viewer-content {
+      padding: 50px 10px 35px;
+    }
+
+    .arrow {
+      width: 38px;
+    }
+  }
+</style>
