@@ -274,29 +274,37 @@ const {
         return Math.hypot(x, y);
       }
 
-      function bindGalleryItems() {
-        items = Array.from(
-          document.querySelectorAll(".gallery-item")
-        );
+      document.addEventListener(
+        "click",
+        (event) => {
+          const target = event.target;
 
-        items.forEach((item, index) => {
-          if (item.dataset.viewerBound === "true") {
+          if (!(target instanceof Element)) {
             return;
           }
 
-          item.dataset.viewerBound = "true";
+          const item =
+            target.closest(".gallery-item");
 
-          item.addEventListener("click", () => {
-            openViewer(index);
-          });
-        });
-      }
+          if (!item) {
+            return;
+          }
 
-      bindGalleryItems();
+          items = Array.from(
+            document.querySelectorAll(
+              ".gallery-item"
+            )
+          );
 
-      window.addEventListener(
-        "gallery-images-loaded",
-        bindGalleryItems
+          const index =
+            items.indexOf(item);
+
+          if (index === -1) {
+            return;
+          }
+
+          openViewer(index);
+        }
       );
 
       close?.addEventListener(
