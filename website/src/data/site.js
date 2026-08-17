@@ -1,5 +1,5 @@
 export const site = {
-  name: "Scenario Galleries",
+  name: "FictionLab Scenario Galleries",
 
   tagline:
     "Character artwork, locations, and visual extras from my FictionLab scenarios.",
