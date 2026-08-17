@@ -1,5 +1,6 @@
 ---
 import { scenarios } from "../data/scenarios.js";
+import { site } from "../data/site.js";
 
 function getScenarioImageCount(scenario) {
   return scenario.galleries.reduce(
@@ -34,13 +35,13 @@ function getScenarioCover(scenario) {
       content="Browse FictionLab scenario artwork and character galleries."
     />
 
-    <title>Scenario Galleries</title>
+    <title>{site.name}</title>
   </head>
 
   <body>
     <header class="site-header">
       <a href="/" class="logo">
-        SCENARIO GALLERIES
+        {site.name}
       </a>
 
       <nav>
@@ -54,12 +55,10 @@ function getScenarioCover(scenario) {
           FICTIONLAB ART ARCHIVE
         </p>
 
-        <h1>Scenario Galleries</h1>
+        <h1>{site.name}</h1>
 
         <p class="intro">
-          Browse character artwork, locations,
-          story moments, and visual extras organized
-          by scenario.
+          {site.tagline}
         </p>
       </section>
 
@@ -148,7 +147,7 @@ function getScenarioCover(scenario) {
     </main>
 
     <footer>
-      <p>Scenario Galleries</p>
+      <p>{site.name} · {site.creator}</p>
     </footer>
   </body>
 </html>
