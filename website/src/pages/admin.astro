@@ -182,13 +182,24 @@ const adminScenarios = scenarios.map((scenario) => ({
               <h2>Existing Images</h2>
             </div>
 
-            <button
-              id="refresh-button"
-              class="secondary-button"
-              type="button"
-            >
-              Refresh
-            </button>
+            <div class="existing-actions">
+              <button
+                id="save-order-button"
+                class="primary-button save-order-button"
+                type="button"
+                disabled
+              >
+                Save Order
+              </button>
+
+              <button
+                id="refresh-button"
+                class="secondary-button"
+                type="button"
+              >
+                Refresh
+              </button>
+            </div>
           </div>
 
           <div
@@ -230,6 +241,11 @@ const adminScenarios = scenarios.map((scenario) => ({
 
       const gallerySelect =
         document.getElementById("gallery-select");
+
+      const saveOrderButton =
+        document.getElementById(
+          "save-order-button"
+        );
 
       const fileInput =
         document.getElementById("image-files");
@@ -365,6 +381,9 @@ const adminScenarios = scenarios.map((scenario) => ({
 
         imageList.innerHTML = "";
 
+        saveOrderButton.disabled =
+          true;
+
         try {
           const response =
             await fetch(
@@ -416,6 +435,168 @@ const adminScenarios = scenarios.map((scenario) => ({
 
               row.className =
                 "image-row";
+
+              row.draggable = true;
+
+              row.dataset.key =
+                image.key;
+
+              const reorderControls =
+                document.createElement(
+                  "div"
+                );
+
+              reorderControls.className =
+                "reorder-controls";
+
+              const dragHandle =
+                document.createElement(
+                  "span"
+                );
+
+              dragHandle.className =
+                "drag-handle";
+
+              dragHandle.textContent =
+                "⋮⋮";
+
+              dragHandle.title =
+                "Drag to reorder";
+
+              const moveUp =
+                document.createElement(
+                  "button"
+                );
+
+              moveUp.type = "button";
+              moveUp.className =
+                "order-button";
+              moveUp.textContent = "↑";
+              moveUp.title = "Move up";
+
+              const moveDown =
+                document.createElement(
+                  "button"
+                );
+
+              moveDown.type = "button";
+              moveDown.className =
+                "order-button";
+              moveDown.textContent = "↓";
+              moveDown.title = "Move down";
+
+              reorderControls.append(
+                dragHandle,
+                moveUp,
+                moveDown
+              );
+
+              function markOrderChanged() {
+                saveOrderButton.disabled =
+                  false;
+
+                listStatus.textContent =
+                  "Order changed — remember to save.";
+              }
+
+              moveUp.addEventListener(
+                "click",
+                () => {
+                  const previous =
+                    row.previousElementSibling;
+
+                  if (!previous) {
+                    return;
+                  }
+
+                  imageList.insertBefore(
+                    row,
+                    previous
+                  );
+
+                  markOrderChanged();
+                }
+              );
+
+              moveDown.addEventListener(
+                "click",
+                () => {
+                  const next =
+                    row.nextElementSibling;
+
+                  if (!next) {
+                    return;
+                  }
+
+                  imageList.insertBefore(
+                    next,
+                    row
+                  );
+
+                  markOrderChanged();
+                }
+              );
+
+              row.addEventListener(
+                "dragstart",
+                (event) => {
+                  row.classList.add(
+                    "dragging-row"
+                  );
+
+                  event.dataTransfer.effectAllowed =
+                    "move";
+
+                  event.dataTransfer.setData(
+                    "text/plain",
+                    image.key
+                  );
+                }
+              );
+
+              row.addEventListener(
+                "dragend",
+                () => {
+                  row.classList.remove(
+                    "dragging-row"
+                  );
+
+                  markOrderChanged();
+                }
+              );
+
+              row.addEventListener(
+                "dragover",
+                (event) => {
+                  event.preventDefault();
+
+                  const dragging =
+                    imageList.querySelector(
+                      ".dragging-row"
+                    );
+
+                  if (
+                    !dragging ||
+                    dragging === row
+                  ) {
+                    return;
+                  }
+
+                  const rect =
+                    row.getBoundingClientRect();
+
+                  const after =
+                    event.clientY >
+                    rect.top +
+                      rect.height / 2;
+
+                  if (after) {
+                    row.after(dragging);
+                  } else {
+                    row.before(dragging);
+                  }
+                }
+              );
 
               const imageMain =
                 document.createElement(
@@ -555,6 +736,7 @@ const adminScenarios = scenarios.map((scenario) => ({
               );
 
               row.append(
+                reorderControls,
                 imageMain,
                 deleteButton
               );
@@ -837,6 +1019,80 @@ const adminScenarios = scenarios.map((scenario) => ({
       uploadButton.addEventListener(
         "click",
         uploadFiles
+      );
+
+      saveOrderButton.addEventListener(
+        "click",
+        async () => {
+          const rows =
+            Array.from(
+              imageList.querySelectorAll(
+                ".image-row[data-key]"
+              )
+            );
+
+          const keys =
+            rows.map(
+              (row) =>
+                row.dataset.key
+            );
+
+          saveOrderButton.disabled =
+            true;
+
+          saveOrderButton.textContent =
+            "Saving...";
+
+          try {
+            const response =
+              await fetch(
+                "/api/admin/reorder",
+                {
+                  method: "POST",
+
+                  headers: {
+                    Authorization:
+                      `Bearer ${adminToken}`,
+
+                    "Content-Type":
+                      "application/json",
+                  },
+
+                  body:
+                    JSON.stringify({
+                      scenario:
+                        scenarioSelect.value,
+
+                      gallery:
+                        gallerySelect.value,
+
+                      keys,
+                    }),
+                }
+              );
+
+            if (!response.ok) {
+              throw new Error(
+                "Could not save order."
+              );
+            }
+
+            listStatus.textContent =
+              "Image order saved.";
+
+            saveOrderButton.textContent =
+              "Save Order";
+          } catch {
+            listStatus.textContent =
+              "Could not save image order.";
+
+            saveOrderButton.disabled =
+              false;
+
+            saveOrderButton.textContent =
+              "Save Order";
+          }
+        }
       );
 
       logoutButton?.addEventListener(
@@ -1222,6 +1478,72 @@ const adminScenarios = scenarios.map((scenario) => ({
     gap: 20px;
   }
 
+  .existing-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .save-order-button {
+    margin-top: 0;
+    padding: 9px 13px;
+  }
+
+  .reorder-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    flex: 0 0 auto;
+  }
+
+  .drag-handle {
+    color: var(--text-muted);
+
+    font-size: 1.2rem;
+    letter-spacing: -0.2em;
+
+    cursor: grab;
+
+    user-select: none;
+
+    padding-right: 4px;
+  }
+
+  .dragging-row {
+    opacity: 0.45;
+
+    border-color:
+      rgba(190, 170, 255, 0.75);
+  }
+
+  .order-button {
+    width: 28px;
+    height: 28px;
+
+    display: grid;
+    place-items: center;
+
+    padding: 0;
+
+    border:
+      1px solid var(--border-soft);
+
+    border-radius: 7px;
+
+    background:
+      rgba(15, 28, 65, 0.7);
+
+    color: var(--text-soft);
+
+    cursor: pointer;
+  }
+
+  .order-button:hover {
+    background:
+      rgba(35, 46, 92, 0.9);
+  }
+
   .secondary-button,
   .delete-button {
     border-radius: 8px;
@@ -1359,6 +1681,19 @@ const adminScenarios = scenarios.map((scenario) => ({
       height: 60px;
 
       flex-basis: 60px;
+    }
+
+    .existing-heading {
+      align-items: flex-start;
+    }
+
+    .existing-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .reorder-controls {
+      flex-direction: column;
     }
 
     .controls-card {
