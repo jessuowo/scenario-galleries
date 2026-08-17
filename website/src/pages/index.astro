@@ -900,13 +900,13 @@ function getScenarioCover(scenario) {
 
     margin: 0 auto;
 
-    padding: 32px 0 44px;
+    padding: 46px 0 58px;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    gap: 28px;
+    gap: 36px;
 
     border-top:
       1px solid var(--border-soft);
@@ -916,21 +916,21 @@ function getScenarioCover(scenario) {
     display: flex;
     align-items: center;
 
-    gap: 12px;
+    gap: 18px;
   }
 
   .footer-cat {
     display: block;
 
-    width: 48px;
-    height: 48px;
+    width: 82px;
+    height: 82px;
 
     object-fit: contain;
 
     filter:
       drop-shadow(
-        0 0 12px
-        rgba(147, 120, 255, 0.24)
+        0 0 18px
+        rgba(147, 120, 255, 0.3)
       );
   }
 
@@ -939,16 +939,16 @@ function getScenarioCover(scenario) {
 
     color: var(--text-soft);
 
-    font-size: 0.82rem;
-    font-weight: 700;
+    font-size: 1.05rem;
+    font-weight: 750;
   }
 
   .footer-credit {
-    margin: 3px 0 0;
+    margin: 5px 0 0;
 
     color: var(--text-muted);
 
-    font-size: 0.72rem;
+    font-size: 0.86rem;
   }
 
   .footer-note {
@@ -956,7 +956,7 @@ function getScenarioCover(scenario) {
 
     color: var(--text-muted);
 
-    font-size: 0.72rem;
+    font-size: 0.86rem;
 
     letter-spacing: 0.04em;
   }
@@ -1042,16 +1042,27 @@ function getScenarioCover(scenario) {
       flex-direction: column;
       align-items: flex-start;
 
-      gap: 18px;
+      gap: 22px;
+
+      padding: 38px 0 46px;
     }
 
     .footer-cat {
-      width: 44px;
-      height: 44px;
+      width: 72px;
+      height: 72px;
+    }
+
+    .footer-name {
+      font-size: 1rem;
+    }
+
+    .footer-credit,
+    .footer-note {
+      font-size: 0.82rem;
     }
 
     .footer-note {
-      max-width: 260px;
+      max-width: 320px;
     }
   }
 </style>
