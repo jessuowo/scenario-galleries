@@ -396,6 +396,33 @@ const adminScenarios = scenarios.map((scenario) => ({
               row.className =
                 "image-row";
 
+              const imageMain =
+                document.createElement(
+                  "div"
+                );
+
+              imageMain.className =
+                "image-main";
+
+              const thumbnail =
+                document.createElement(
+                  "img"
+                );
+
+              thumbnail.className =
+                "image-thumb";
+
+              thumbnail.src =
+                `/api/gallery-image?key=${encodeURIComponent(
+                  image.key
+                )}`;
+
+              thumbnail.alt =
+                image.originalName;
+
+              thumbnail.loading =
+                "lazy";
+
               const info =
                 document.createElement(
                   "div"
@@ -423,6 +450,11 @@ const adminScenarios = scenarios.map((scenario) => ({
               info.append(
                 name,
                 size
+              );
+
+              imageMain.append(
+                thumbnail,
+                info
               );
 
               const deleteButton =
@@ -502,7 +534,7 @@ const adminScenarios = scenarios.map((scenario) => ({
               );
 
               row.append(
-                info,
+                imageMain,
                 deleteButton
               );
 
@@ -1058,6 +1090,34 @@ const adminScenarios = scenarios.map((scenario) => ({
       rgba(5, 11, 31, 0.58);
   }
 
+  .image-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    flex: 1;
+  }
+
+  .image-thumb {
+    width: 72px;
+    height: 72px;
+
+    flex: 0 0 72px;
+
+    object-fit: cover;
+
+    border-radius: 10px;
+
+    border:
+      1px solid var(--border-soft);
+
+    background:
+      rgba(3, 8, 24, 0.8);
+  }
+
   .image-info {
     min-width: 0;
 
@@ -1114,6 +1174,13 @@ const adminScenarios = scenarios.map((scenario) => ({
   @media (max-width: 600px) {
     .admin-page {
       padding-top: 25px;
+    }
+
+    .image-thumb {
+      width: 60px;
+      height: 60px;
+
+      flex-basis: 60px;
     }
 
     .controls-card {
