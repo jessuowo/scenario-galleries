@@ -534,6 +534,51 @@ const adminScenarios = scenarios.map((scenario) => ({
           "save-scenario-crop"
         );
 
+      const scenarioPageCoverPreview =
+        document.getElementById(
+          "scenario-page-cover-preview"
+        );
+
+      const scenarioPageCropX =
+        document.getElementById(
+          "scenario-page-crop-x"
+        );
+
+      const scenarioPageCropY =
+        document.getElementById(
+          "scenario-page-crop-y"
+        );
+
+      const scenarioPageCoverZoom =
+        document.getElementById(
+          "scenario-page-cover-zoom"
+        );
+
+      const scenarioPageCropXValue =
+        document.getElementById(
+          "scenario-page-crop-x-value"
+        );
+
+      const scenarioPageCropYValue =
+        document.getElementById(
+          "scenario-page-crop-y-value"
+        );
+
+      const scenarioPageCoverZoomValue =
+        document.getElementById(
+          "scenario-page-cover-zoom-value"
+        );
+
+      const pageCropPreviewPosition =
+        document.getElementById(
+          "page-crop-preview-position"
+        );
+
+      const saveScenarioPageCrop =
+        document.getElementById(
+          "save-scenario-page-crop"
+        );
+
       const saveOrderButton =
         document.getElementById(
           "save-order-button"
@@ -756,6 +801,48 @@ const adminScenarios = scenarios.map((scenario) => ({
               `${currentCropX}% × ${currentCropY}%`;
           }
 
+          const currentPageCropX =
+            Number.isFinite(
+              data.scenarioPageCropX
+            )
+              ? data.scenarioPageCropX
+              : currentCropX;
+
+          const currentPageCropY =
+            Number.isFinite(
+              data.scenarioPageCropY
+            )
+              ? data.scenarioPageCropY
+              : currentCropY;
+
+          const currentPageZoom =
+            Number.isFinite(
+              data.scenarioPageZoom
+            )
+              ? data.scenarioPageZoom
+              : 1;
+
+          scenarioPageCropX.value =
+            String(currentPageCropX);
+
+          scenarioPageCropY.value =
+            String(currentPageCropY);
+
+          scenarioPageCoverZoom.value =
+            String(currentPageZoom);
+
+          scenarioPageCropXValue.textContent =
+            `${Math.round(currentPageCropX)}%`;
+
+          scenarioPageCropYValue.textContent =
+            `${Math.round(currentPageCropY)}%`;
+
+          scenarioPageCoverZoomValue.textContent =
+            `${Math.round(currentPageZoom * 100)}%`;
+
+          pageCropPreviewPosition.textContent =
+            `${Math.round(currentPageCropX)}% × ${Math.round(currentPageCropY)}%`;
+
           scenarioCoverPreview.innerHTML = "";
 
           if (currentScenarioCoverUrl) {
@@ -785,6 +872,36 @@ const adminScenarios = scenarios.map((scenario) => ({
               "No scenario cover";
 
             scenarioCoverPreview.appendChild(
+              empty
+            );
+          }
+
+          scenarioPageCoverPreview.innerHTML =
+            "";
+
+          if (currentScenarioCoverUrl) {
+            const pagePreviewImage =
+              document.createElement("img");
+
+            pagePreviewImage.src =
+              currentScenarioCoverUrl;
+
+            pagePreviewImage.alt =
+              "Scenario page cover preview";
+
+            scenarioPageCoverPreview.appendChild(
+              pagePreviewImage
+            );
+
+            updateScenarioPageCropPreview();
+          } else {
+            const empty =
+              document.createElement("span");
+
+            empty.textContent =
+              "No scenario cover";
+
+            scenarioPageCoverPreview.appendChild(
               empty
             );
           }
@@ -1543,6 +1660,77 @@ const adminScenarios = scenarios.map((scenario) => ({
       scenarioCoverZoom?.addEventListener(
         "input",
         updateScenarioCropPreview
+      );
+
+      function updateScenarioPageCropPreview() {
+        const x =
+          Number(scenarioPageCropX.value);
+
+        const y =
+          Number(scenarioPageCropY.value);
+
+        const zoom =
+          Number(scenarioPageCoverZoom.value);
+
+        scenarioPageCropXValue.textContent =
+          `${Math.round(x)}%`;
+
+        scenarioPageCropYValue.textContent =
+          `${Math.round(y)}%`;
+
+        scenarioPageCoverZoomValue.textContent =
+          `${Math.round(zoom * 100)}%`;
+
+        pageCropPreviewPosition.textContent =
+          `${Math.round(x)}% × ${Math.round(y)}%`;
+
+        const previewImage =
+          scenarioPageCoverPreview.querySelector(
+            "img"
+          );
+
+        if (!previewImage) {
+          return;
+        }
+
+        const rect =
+          scenarioPageCoverPreview.getBoundingClientRect();
+
+        const maxX =
+          (rect.width * (zoom - 1)) / 2;
+
+        const maxY =
+          (rect.height * (zoom - 1)) / 2;
+
+        const translateX =
+          ((50 - x) / 50) * maxX;
+
+        const translateY =
+          ((50 - y) / 50) * maxY;
+
+        previewImage.style.objectPosition =
+          "50% 50%";
+
+        previewImage.style.transformOrigin =
+          "50% 50%";
+
+        previewImage.style.transform =
+          `translate3d(${translateX}px, ${translateY}px, 0) scale(${zoom})`;
+      }
+
+      scenarioPageCropX?.addEventListener(
+        "input",
+        updateScenarioPageCropPreview
+      );
+
+      scenarioPageCropY?.addEventListener(
+        "input",
+        updateScenarioPageCropPreview
+      );
+
+      scenarioPageCoverZoom?.addEventListener(
+        "input",
+        updateScenarioPageCropPreview
       );
 
       let cropDragging = false;
