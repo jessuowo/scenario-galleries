@@ -1733,6 +1733,167 @@ const adminScenarios = scenarios.map((scenario) => ({
         updateScenarioPageCropPreview
       );
 
+      let pageCropDragging = false;
+
+      let pageDragStartX = 0;
+      let pageDragStartY = 0;
+
+      let pageStartX = 50;
+      let pageStartY = 50;
+
+      scenarioPageCoverPreview?.addEventListener(
+        "pointerdown",
+        (event) => {
+          const previewImage =
+            scenarioPageCoverPreview.querySelector(
+              "img"
+            );
+
+          if (!previewImage) {
+            return;
+          }
+
+          const zoom =
+            Number(
+              scenarioPageCoverZoom.value
+            );
+
+          if (zoom <= 1) {
+            scenarioCoverStatus.textContent =
+              "Increase Scenario Page Zoom above 100% to drag.";
+
+            return;
+          }
+
+          pageCropDragging = true;
+
+          pageDragStartX =
+            event.clientX;
+
+          pageDragStartY =
+            event.clientY;
+
+          pageStartX =
+            Number(
+              scenarioPageCropX.value
+            );
+
+          pageStartY =
+            Number(
+              scenarioPageCropY.value
+            );
+
+          scenarioPageCoverPreview.classList.add(
+            "dragging-preview"
+          );
+
+          scenarioPageCoverPreview.setPointerCapture(
+            event.pointerId
+          );
+
+          event.preventDefault();
+        }
+      );
+
+      scenarioPageCoverPreview?.addEventListener(
+        "pointermove",
+        (event) => {
+          if (!pageCropDragging) {
+            return;
+          }
+
+          const zoom =
+            Number(
+              scenarioPageCoverZoom.value
+            );
+
+          const rect =
+            scenarioPageCoverPreview.getBoundingClientRect();
+
+          const maxX =
+            (rect.width * (zoom - 1)) / 2;
+
+          const maxY =
+            (rect.height * (zoom - 1)) / 2;
+
+          const deltaX =
+            event.clientX -
+            pageDragStartX;
+
+          const deltaY =
+            event.clientY -
+            pageDragStartY;
+
+          let nextX =
+            pageStartX;
+
+          let nextY =
+            pageStartY;
+
+          if (maxX > 0) {
+            nextX =
+              pageStartX -
+              (deltaX / maxX) * 50;
+          }
+
+          if (maxY > 0) {
+            nextY =
+              pageStartY -
+              (deltaY / maxY) * 50;
+          }
+
+          nextX =
+            Math.min(
+              100,
+              Math.max(0, nextX)
+            );
+
+          nextY =
+            Math.min(
+              100,
+              Math.max(0, nextY)
+            );
+
+          scenarioPageCropX.value =
+            String(nextX);
+
+          scenarioPageCropY.value =
+            String(nextY);
+
+          updateScenarioPageCropPreview();
+        }
+      );
+
+      function stopPageCropDragging(
+        event
+      ) {
+        if (!pageCropDragging) {
+          return;
+        }
+
+        pageCropDragging = false;
+
+        scenarioPageCoverPreview.classList.remove(
+          "dragging-preview"
+        );
+
+        try {
+          scenarioPageCoverPreview.releasePointerCapture(
+            event.pointerId
+          );
+        } catch {}
+      }
+
+      scenarioPageCoverPreview?.addEventListener(
+        "pointerup",
+        stopPageCropDragging
+      );
+
+      scenarioPageCoverPreview?.addEventListener(
+        "pointercancel",
+        stopPageCropDragging
+      );
+
       let cropDragging = false;
 
       let cropDragStartX = 0;
