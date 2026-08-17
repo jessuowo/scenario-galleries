@@ -199,6 +199,100 @@ const adminScenarios = scenarios.map((scenario) => ({
             </button>
           </div>
 
+          <div class="scenario-preview-section scenario-page-editor">
+            <div class="scenario-preview-heading">
+              <span>Scenario Page Preview</span>
+
+              <span id="page-crop-preview-position">
+                50% × 50%
+              </span>
+            </div>
+
+            <div
+              class="scenario-cover-preview scenario-page-cover-preview"
+              id="scenario-page-cover-preview"
+            >
+              <span>No scenario cover</span>
+            </div>
+
+            <p class="preview-help">
+              This framing is used for the large cover on the scenario page.
+            </p>
+
+            <div class="crop-controls">
+              <div class="crop-field">
+                <div class="crop-label">
+                  <label for="scenario-page-crop-x">
+                    Horizontal Position
+                  </label>
+
+                  <span id="scenario-page-crop-x-value">
+                    50%
+                  </span>
+                </div>
+
+                <input
+                  id="scenario-page-crop-x"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value="50"
+                />
+              </div>
+
+              <div class="crop-field">
+                <div class="crop-label">
+                  <label for="scenario-page-crop-y">
+                    Vertical Position
+                  </label>
+
+                  <span id="scenario-page-crop-y-value">
+                    50%
+                  </span>
+                </div>
+
+                <input
+                  id="scenario-page-crop-y"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value="50"
+                />
+              </div>
+
+              <div class="crop-field">
+                <div class="crop-label">
+                  <label for="scenario-page-cover-zoom">
+                    Zoom
+                  </label>
+
+                  <span id="scenario-page-cover-zoom-value">
+                    100%
+                  </span>
+                </div>
+
+                <input
+                  id="scenario-page-cover-zoom"
+                  type="range"
+                  min="1"
+                  max="3"
+                  step="0.05"
+                  value="1"
+                />
+              </div>
+
+              <button
+                id="save-scenario-page-crop"
+                class="secondary-button"
+                type="button"
+              >
+                Save Scenario Page Framing
+              </button>
+            </div>
+          </div>
+
           <div class="scenario-cover-upload">
             <label
               class="secondary-button scenario-cover-picker"
@@ -2265,6 +2359,19 @@ const adminScenarios = scenarios.map((scenario) => ({
     color: var(--text-muted);
 
     font-size: 0.85rem;
+  }
+
+  .scenario-page-editor {
+    margin-top: 34px;
+
+    padding-top: 28px;
+
+    border-top:
+      1px solid var(--border-soft);
+  }
+
+  .scenario-page-cover-preview {
+    aspect-ratio: 4 / 3;
   }
 
   .scenario-preview-section {
