@@ -176,6 +176,46 @@ const {
 
       let currentIndex = 0;
 
+      // Zoom / pan state
+      let scale = 1;
+      let translateX = 0;
+      let translateY = 0;
+
+      let startTranslateX = 0;
+      let startTranslateY = 0;
+
+      let pointers = new Map();
+
+      let initialPinchDistance = 0;
+      let initialPinchScale = 1;
+
+      let swipeStartX = 0;
+      let swipeStartY = 0;
+
+      let lastTap = 0;
+
+      const MIN_SCALE = 1;
+      const MAX_SCALE = 5;
+
+      function applyTransform() {
+        viewerImage.style.transform =
+          `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+      }
+
+      function resetZoom() {
+        scale = 1;
+        translateX = 0;
+        translateY = 0;
+
+        viewerImage.style.transition = "transform 0.2s ease";
+
+        applyTransform();
+
+        setTimeout(() => {
+          viewerImage.style.transition = "";
+        }, 200);
+      }
+
       function showImage(index) {
         const item = items[index];
 
@@ -191,6 +231,8 @@ const {
 
         counter.textContent =
           `${index + 1} / ${items.length}`;
+
+        resetZoom();
       }
 
       function openViewer(index) {
@@ -219,19 +261,32 @@ const {
         document.body.classList.remove(
           "viewer-open"
         );
+
+        resetZoom();
       }
 
       function nextImage() {
+        if (items.length === 0) return;
+
         showImage(
           (currentIndex + 1) % items.length
         );
       }
 
       function previousImage() {
+        if (items.length === 0) return;
+
         showImage(
           (currentIndex - 1 + items.length) %
             items.length
         );
+      }
+
+      function getDistance(point1, point2) {
+        const x = point2.clientX - point1.clientX;
+        const y = point2.clientY - point1.clientY;
+
+        return Math.hypot(x, y);
       }
 
       items.forEach((item, index) => {
@@ -255,11 +310,301 @@ const {
         previousImage
       );
 
+      // -------------------------
+      // POINTER DOWN
+      // -------------------------
+
+      viewerImage?.addEventListener(
+        "pointerdown",
+        (event) => {
+          event.preventDefault();
+
+          viewerImage.setPointerCapture(
+            event.pointerId
+          );
+
+          pointers.set(
+            event.pointerId,
+            event
+          );
+
+          if (pointers.size === 1) {
+            startTranslateX = translateX;
+            startTranslateY = translateY;
+
+            swipeStartX = event.clientX;
+            swipeStartY = event.clientY;
+          }
+
+          if (pointers.size === 2) {
+            const points =
+              Array.from(pointers.values());
+
+            initialPinchDistance =
+              getDistance(
+                points[0],
+                points[1]
+              );
+
+            initialPinchScale = scale;
+          }
+        }
+      );
+
+      // -------------------------
+      // POINTER MOVE
+      // -------------------------
+
+      viewerImage?.addEventListener(
+        "pointermove",
+        (event) => {
+          if (
+            !pointers.has(event.pointerId)
+          ) {
+            return;
+          }
+
+          pointers.set(
+            event.pointerId,
+            event
+          );
+
+          // Pinch zoom
+          if (pointers.size === 2) {
+            const points =
+              Array.from(pointers.values());
+
+            const distance =
+              getDistance(
+                points[0],
+                points[1]
+              );
+
+            if (
+              initialPinchDistance > 0
+            ) {
+              scale =
+                initialPinchScale *
+                (distance /
+                  initialPinchDistance);
+
+              scale = Math.min(
+                MAX_SCALE,
+                Math.max(
+                  MIN_SCALE,
+                  scale
+                )
+              );
+
+              if (scale === 1) {
+                translateX = 0;
+                translateY = 0;
+              }
+
+              applyTransform();
+            }
+
+            return;
+          }
+
+          // Drag image when zoomed
+          if (
+            pointers.size === 1 &&
+            scale > 1
+          ) {
+            const point =
+              Array.from(
+                pointers.values()
+              )[0];
+
+            translateX =
+              startTranslateX +
+              (point.clientX -
+                swipeStartX);
+
+            translateY =
+              startTranslateY +
+              (point.clientY -
+                swipeStartY);
+
+            applyTransform();
+          }
+        }
+      );
+
+      // -------------------------
+      // POINTER UP
+      // -------------------------
+
+      function handlePointerEnd(event) {
+        const point =
+          pointers.get(event.pointerId);
+
+        if (!point) return;
+
+        const endX = event.clientX;
+        const endY = event.clientY;
+
+        const differenceX =
+          endX - swipeStartX;
+
+        const differenceY =
+          endY - swipeStartY;
+
+        pointers.delete(
+          event.pointerId
+        );
+
+        // Swipe between photos only
+        // when image isn't zoomed.
+        if (
+          pointers.size === 0 &&
+          scale === 1
+        ) {
+          const horizontalSwipe =
+            Math.abs(differenceX) > 60;
+
+          const mostlyHorizontal =
+            Math.abs(differenceX) >
+            Math.abs(differenceY);
+
+          if (
+            horizontalSwipe &&
+            mostlyHorizontal
+          ) {
+            if (differenceX < 0) {
+              nextImage();
+            } else {
+              previousImage();
+            }
+          }
+        }
+
+        if (
+          pointers.size === 1 &&
+          scale > 1
+        ) {
+          const remaining =
+            Array.from(
+              pointers.values()
+            )[0];
+
+          swipeStartX =
+            remaining.clientX;
+
+          swipeStartY =
+            remaining.clientY;
+
+          startTranslateX =
+            translateX;
+
+          startTranslateY =
+            translateY;
+        }
+
+        if (scale < 1) {
+          resetZoom();
+        }
+      }
+
+      viewerImage?.addEventListener(
+        "pointerup",
+        handlePointerEnd
+      );
+
+      viewerImage?.addEventListener(
+        "pointercancel",
+        handlePointerEnd
+      );
+
+      // -------------------------
+      // DOUBLE TAP / DOUBLE CLICK
+      // -------------------------
+
+      viewerImage?.addEventListener(
+        "pointerup",
+        () => {
+          if (pointers.size > 0) {
+            return;
+          }
+
+          const now = Date.now();
+
+          if (now - lastTap < 300) {
+            if (scale > 1) {
+              resetZoom();
+            } else {
+              scale = 2.5;
+              translateX = 0;
+              translateY = 0;
+
+              viewerImage.style.transition =
+                "transform 0.2s ease";
+
+              applyTransform();
+
+              setTimeout(() => {
+                viewerImage.style.transition =
+                  "";
+              }, 200);
+            }
+
+            lastTap = 0;
+          } else {
+            lastTap = now;
+          }
+        }
+      );
+
+      // -------------------------
+      // DESKTOP MOUSE WHEEL ZOOM
+      // -------------------------
+
+      viewerImage?.addEventListener(
+        "wheel",
+        (event) => {
+          if (!viewer?.classList.contains("open")) {
+            return;
+          }
+
+          event.preventDefault();
+
+          const zoomAmount =
+            event.deltaY < 0
+              ? 0.25
+              : -0.25;
+
+          scale += zoomAmount;
+
+          scale = Math.min(
+            MAX_SCALE,
+            Math.max(
+              MIN_SCALE,
+              scale
+            )
+          );
+
+          if (scale === 1) {
+            translateX = 0;
+            translateY = 0;
+          }
+
+          applyTransform();
+        },
+        { passive: false }
+      );
+
+      // -------------------------
+      // KEYBOARD
+      // -------------------------
+
       document.addEventListener(
         "keydown",
         (event) => {
           if (
-            !viewer?.classList.contains("open")
+            !viewer?.classList.contains(
+              "open"
+            )
           ) {
             return;
           }
@@ -268,11 +613,17 @@ const {
             closeViewer();
           }
 
-          if (event.key === "ArrowRight") {
+          if (
+            event.key === "ArrowRight" &&
+            scale === 1
+          ) {
             nextImage();
           }
 
-          if (event.key === "ArrowLeft") {
+          if (
+            event.key === "ArrowLeft" &&
+            scale === 1
+          ) {
             previousImage();
           }
         }
@@ -476,7 +827,7 @@ const {
     display: none;
 
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
 
     align-items: center;
     justify-content: center;
@@ -510,6 +861,23 @@ const {
     height: auto;
 
     object-fit: contain;
+
+    transform-origin: center center;
+
+    touch-action: none;
+
+    user-select: none;
+    -webkit-user-select: none;
+
+    -webkit-user-drag: none;
+
+    cursor: grab;
+
+    will-change: transform;
+  }
+
+  #viewer-image:active {
+    cursor: grabbing;
   }
 
   #counter {
