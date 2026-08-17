@@ -92,6 +92,57 @@ const adminScenarios = scenarios.map((scenario) => ({
           </button>
         </div>
 
+        <section class="scenario-cover-card">
+          <div>
+            <p class="eyebrow">
+              SCENARIO COVER
+            </p>
+
+            <h2>Scenario Cover Image</h2>
+
+            <p class="scenario-cover-description">
+              Choose a dedicated cover image or use an image from one of the scenario's albums.
+            </p>
+          </div>
+
+          <div
+            class="scenario-cover-preview"
+            id="scenario-cover-preview"
+          >
+            <span>No scenario cover</span>
+          </div>
+
+          <div class="scenario-cover-upload">
+            <label
+              class="secondary-button scenario-cover-picker"
+              for="scenario-cover-file"
+            >
+              Choose Custom Cover
+            </label>
+
+            <input
+              id="scenario-cover-file"
+              type="file"
+              accept="image/*"
+              hidden
+            />
+
+            <button
+              id="upload-scenario-cover"
+              class="primary-button"
+              type="button"
+              disabled
+            >
+              Upload Cover
+            </button>
+          </div>
+
+          <p
+            class="status"
+            id="scenario-cover-status"
+          ></p>
+        </section>
+
         <div class="controls-card">
           <div class="field">
             <label for="scenario-select">
@@ -241,6 +292,26 @@ const adminScenarios = scenarios.map((scenario) => ({
 
       const gallerySelect =
         document.getElementById("gallery-select");
+
+      const scenarioCoverPreview =
+        document.getElementById(
+          "scenario-cover-preview"
+        );
+
+      const scenarioCoverFile =
+        document.getElementById(
+          "scenario-cover-file"
+        );
+
+      const uploadScenarioCover =
+        document.getElementById(
+          "upload-scenario-cover"
+        );
+
+      const scenarioCoverStatus =
+        document.getElementById(
+          "scenario-cover-status"
+        );
 
       const saveOrderButton =
         document.getElementById(
@@ -411,6 +482,43 @@ const adminScenarios = scenarios.map((scenario) => ({
 
           const currentCover =
             data.cover || null;
+
+          const currentScenarioCover =
+            data.scenarioCover || null;
+
+          const currentScenarioCoverUrl =
+            data.scenarioCoverUrl || null;
+
+          scenarioCoverPreview.innerHTML = "";
+
+          if (currentScenarioCoverUrl) {
+            const coverImage =
+              document.createElement(
+                "img"
+              );
+
+            coverImage.src =
+              currentScenarioCoverUrl;
+
+            coverImage.alt =
+              "Current scenario cover";
+
+            scenarioCoverPreview.appendChild(
+              coverImage
+            );
+          } else {
+            const empty =
+              document.createElement(
+                "span"
+              );
+
+            empty.textContent =
+              "No scenario cover";
+
+            scenarioCoverPreview.appendChild(
+              empty
+            );
+          }
 
           if (
             !data.images ||
@@ -678,7 +786,7 @@ const adminScenarios = scenarios.map((scenario) => ({
 
               if (isCover) {
                 coverButton.textContent =
-                  "★ Cover";
+                  "★ Album Cover";
 
                 coverButton.disabled =
                   true;
@@ -688,7 +796,7 @@ const adminScenarios = scenarios.map((scenario) => ({
                 );
               } else {
                 coverButton.textContent =
-                  "Set as Cover";
+                  "Set Album Cover";
               }
 
               coverButton.addEventListener(
@@ -744,10 +852,94 @@ const adminScenarios = scenarios.map((scenario) => ({
                       false;
 
                     coverButton.textContent =
-                      "Set as Cover";
+                      "Set Album Cover";
 
                     listStatus.textContent =
                       "Could not update gallery cover.";
+                  }
+                }
+              );
+
+              const scenarioCoverButton =
+                document.createElement(
+                  "button"
+                );
+
+              scenarioCoverButton.type =
+                "button";
+
+              scenarioCoverButton.className =
+                "scenario-cover-button";
+
+              const isScenarioCover =
+                currentScenarioCover ===
+                image.key;
+
+              if (isScenarioCover) {
+                scenarioCoverButton.textContent =
+                  "★ Scenario Cover";
+
+                scenarioCoverButton.disabled =
+                  true;
+              } else {
+                scenarioCoverButton.textContent =
+                  "Use as Scenario Cover";
+              }
+
+              scenarioCoverButton.addEventListener(
+                "click",
+                async () => {
+                  scenarioCoverButton.disabled =
+                    true;
+
+                  scenarioCoverButton.textContent =
+                    "Saving...";
+
+                  try {
+                    const response =
+                      await fetch(
+                        "/api/admin/scenario-cover",
+                        {
+                          method: "POST",
+
+                          headers: {
+                            Authorization:
+                              `Bearer ${adminToken}`,
+
+                            "Content-Type":
+                              "application/json",
+                          },
+
+                          body:
+                            JSON.stringify({
+                              scenario:
+                                scenarioSelect.value,
+
+                              key:
+                                image.key,
+                            }),
+                        }
+                      );
+
+                    if (!response.ok) {
+                      throw new Error(
+                        "Could not update scenario cover."
+                      );
+                    }
+
+                    scenarioCoverStatus.textContent =
+                      "Scenario cover updated.";
+
+                    await loadImages();
+                  } catch {
+                    scenarioCoverButton.disabled =
+                      false;
+
+                    scenarioCoverButton.textContent =
+                      "Use as Scenario Cover";
+
+                    scenarioCoverStatus.textContent =
+                      "Could not update scenario cover.";
                   }
                 }
               );
@@ -838,6 +1030,7 @@ const adminScenarios = scenarios.map((scenario) => ({
 
               imageActions.append(
                 coverButton,
+                scenarioCoverButton,
                 deleteButton
               );
 
@@ -1013,6 +1206,108 @@ const adminScenarios = scenarios.map((scenario) => ({
       refreshButton.addEventListener(
         "click",
         loadImages
+      );
+
+      scenarioCoverFile?.addEventListener(
+        "change",
+        () => {
+          const file =
+            scenarioCoverFile.files?.[0];
+
+          uploadScenarioCover.disabled =
+            !file;
+
+          if (file) {
+            scenarioCoverStatus.textContent =
+              `${file.name} · ${formatBytes(
+                file.size
+              )}`;
+          }
+        }
+      );
+
+      uploadScenarioCover?.addEventListener(
+        "click",
+        async () => {
+          const file =
+            scenarioCoverFile.files?.[0];
+
+          if (
+            !file ||
+            !adminToken
+          ) {
+            return;
+          }
+
+          uploadScenarioCover.disabled =
+            true;
+
+          uploadScenarioCover.textContent =
+            "Uploading...";
+
+          scenarioCoverStatus.textContent =
+            "Uploading custom scenario cover...";
+
+          const formData =
+            new FormData();
+
+          formData.append(
+            "scenario",
+            scenarioSelect.value
+          );
+
+          formData.append(
+            "file",
+            file
+          );
+
+          try {
+            const response =
+              await fetch(
+                "/api/admin/scenario-cover-upload",
+                {
+                  method: "POST",
+
+                  headers: {
+                    Authorization:
+                      `Bearer ${adminToken}`,
+                  },
+
+                  body: formData,
+                }
+              );
+
+            if (!response.ok) {
+              const data =
+                await response.json();
+
+              throw new Error(
+                data.message ||
+                  "Upload failed."
+              );
+            }
+
+            scenarioCoverFile.value =
+              "";
+
+            scenarioCoverStatus.textContent =
+              "Scenario cover updated.";
+
+            uploadScenarioCover.textContent =
+              "Upload Cover";
+
+            await loadImages();
+          } catch (error) {
+            scenarioCoverStatus.textContent =
+              error.message;
+
+            uploadScenarioCover.disabled =
+              false;
+
+            uploadScenarioCover.textContent =
+              "Upload Cover";
+          }
+        }
       );
 
       function updateSelectedFiles() {
@@ -1346,6 +1641,119 @@ const adminScenarios = scenarios.map((scenario) => ({
 
     background:
       rgba(31, 43, 88, 0.8);
+  }
+
+  .scenario-cover-card {
+    padding: 26px;
+
+    border:
+      1px solid var(--border-soft);
+
+    border-radius: 18px;
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(16, 31, 70, 0.82),
+        rgba(8, 14, 38, 0.88)
+      );
+
+    backdrop-filter: blur(14px);
+  }
+
+  .scenario-cover-description {
+    color: var(--text-muted);
+
+    font-size: 0.85rem;
+  }
+
+  .scenario-cover-preview {
+    width: 100%;
+    max-width: 420px;
+
+    aspect-ratio: 16 / 10;
+
+    margin-top: 22px;
+
+    display: grid;
+    place-items: center;
+
+    overflow: hidden;
+
+    border:
+      1px solid var(--border-soft);
+
+    border-radius: 14px;
+
+    background:
+      rgba(4, 9, 28, 0.72);
+
+    color: var(--text-muted);
+  }
+
+  .scenario-cover-preview img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+  }
+
+  .scenario-cover-upload {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 16px;
+  }
+
+  .scenario-cover-picker {
+    display: inline-flex;
+    align-items: center;
+
+    cursor: pointer;
+  }
+
+  .scenario-cover-button {
+    padding: 8px 11px;
+
+    border:
+      1px solid
+      rgba(137, 180, 255, 0.35);
+
+    border-radius: 8px;
+
+    background:
+      rgba(35, 68, 120, 0.25);
+
+    color: #c9ddff;
+
+    font-size: 0.75rem;
+    font-weight: 700;
+
+    cursor: pointer;
+  }
+
+  .scenario-cover-button:hover:not(:disabled) {
+    border-color:
+      rgba(159, 198, 255, 0.7);
+
+    background:
+      rgba(41, 80, 142, 0.42);
+  }
+
+  .scenario-cover-button:disabled {
+    opacity: 1;
+
+    color: #fff3a7;
+
+    border-color:
+      rgba(255, 236, 151, 0.42);
+
+    background:
+      rgba(111, 90, 35, 0.2);
   }
 
   .login-panel,
@@ -1862,6 +2270,17 @@ const adminScenarios = scenarios.map((scenario) => ({
     .image-actions {
       flex-direction: column;
       align-items: stretch;
+    }
+
+    .scenario-cover-upload {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .scenario-cover-picker,
+    .scenario-cover-upload .primary-button {
+      justify-content: center;
+      width: 100%;
     }
 
     .controls-card {

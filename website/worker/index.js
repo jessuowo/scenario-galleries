@@ -527,6 +527,12 @@ export default {
             gallery
           );
 
+        const scenarioMeta =
+          await getScenarioMeta(
+            env,
+            scenario
+          );
+
         const savedOrder =
           galleryMeta.order;
 
@@ -551,7 +557,20 @@ export default {
           success: true,
           scenario,
           gallery,
-          cover: galleryMeta.cover,
+
+          cover:
+            galleryMeta.cover,
+
+          scenarioCover:
+            scenarioMeta.cover,
+
+          scenarioCoverUrl:
+            scenarioMeta.cover
+              ? `/api/gallery-image?key=${encodeURIComponent(
+                  scenarioMeta.cover
+                )}`
+              : null,
+
           images,
         });
       } catch (error) {
