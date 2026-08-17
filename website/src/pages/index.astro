@@ -245,6 +245,69 @@ function getScenarioCover(scenario) {
         document.querySelectorAll(".scenario-card")
       );
 
+      function applyScenarioCoverCrop(
+        image,
+        cropX,
+        cropY,
+        zoom
+      ) {
+        if (!image) {
+          return;
+        }
+
+        const container =
+          image.parentElement;
+
+        if (!container) {
+          return;
+        }
+
+        const rect =
+          container.getBoundingClientRect();
+
+        const safeZoom =
+          Number.isFinite(zoom)
+            ? Math.max(1, zoom)
+            : 1;
+
+        const safeX =
+          Number.isFinite(cropX)
+            ? cropX
+            : 50;
+
+        const safeY =
+          Number.isFinite(cropY)
+            ? cropY
+            : 50;
+
+        const maxX =
+          (rect.width *
+            (safeZoom - 1)) /
+          2;
+
+        const maxY =
+          (rect.height *
+            (safeZoom - 1)) /
+          2;
+
+        const translateX =
+          ((50 - safeX) / 50) *
+          maxX;
+
+        const translateY =
+          ((50 - safeY) / 50) *
+          maxY;
+
+        image.style.objectPosition =
+          "50% 50%";
+
+        image.style.transformOrigin =
+          "50% 50%";
+
+        image.style.transform =
+          `translate3d(${translateX}px, ${translateY}px, 0) scale(${safeZoom})`;
+      }
+
       async function loadScenarioCounts() {
         await Promise.all(
           scenarioCards.map(async (card) => {
@@ -307,22 +370,12 @@ function getScenarioCover(scenario) {
                     data.scenarioCover;
                 }
 
-                const cropX =
-                  Number.isFinite(
-                    data.scenarioCropX
-                  )
-                    ? data.scenarioCropX
-                    : 50;
-
-                const cropY =
-                  Number.isFinite(
-                    data.scenarioCropY
-                  )
-                    ? data.scenarioCropY
-                    : 50;
-
-                coverImage.style.objectPosition =
-                  `${cropX}% ${cropY}%`;
+                applyScenarioCoverCrop(
+                  coverImage,
+                  data.scenarioCropX,
+                  data.scenarioCropY,
+                  data.scenarioZoom
+                );
               }
             } catch (error) {
               console.error(error);

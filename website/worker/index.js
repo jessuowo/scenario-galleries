@@ -940,6 +940,8 @@ export default {
             scenarioMeta.cropX,
           scenarioCropY:
             scenarioMeta.cropY,
+          scenarioZoom:
+            scenarioMeta.zoom,
           galleries,
         });
       } catch (error) {
