@@ -630,11 +630,26 @@ const adminScenarios = scenarios.map((scenario) => ({
               ? data.scenarioCropY
               : 50;
 
+          const currentZoom =
+            Number.isFinite(
+              data.scenarioZoom
+            )
+              ? data.scenarioZoom
+              : 1;
+
           scenarioCropX.value =
             String(currentCropX);
 
           scenarioCropY.value =
             String(currentCropY);
+
+          scenarioCoverZoom.value =
+            String(currentZoom);
+
+          scenarioCoverZoomValue.textContent =
+            `${Math.round(
+              currentZoom * 100
+            )}%`;
 
           scenarioCropXValue.textContent =
             `${currentCropX}%`;
@@ -661,12 +676,11 @@ const adminScenarios = scenarios.map((scenario) => ({
             coverImage.alt =
               "Current scenario cover";
 
-            coverImage.style.objectPosition =
-              `${currentCropX}% ${currentCropY}%`;
-
             scenarioCoverPreview.appendChild(
               coverImage
             );
+
+            updateScenarioCropPreview();
           } else {
             const empty =
               document.createElement(
@@ -1616,6 +1630,11 @@ const adminScenarios = scenarios.map((scenario) => ({
           const cropY =
             Number(scenarioCropY.value);
 
+          const zoom =
+            Number(
+              scenarioCoverZoom.value
+            );
+
           saveScenarioCrop.disabled =
             true;
 
@@ -1647,6 +1666,7 @@ const adminScenarios = scenarios.map((scenario) => ({
 
                       cropX,
                       cropY,
+                      zoom,
                     }),
                 }
               );

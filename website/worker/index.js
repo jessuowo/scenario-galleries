@@ -136,6 +136,7 @@ async function getScenarioMeta(
         cover: null,
         cropX: 50,
         cropY: 50,
+        zoom: 1,
       };
     }
 
@@ -163,12 +164,21 @@ async function getScenarioMeta(
               Math.max(0, data.cropY)
             )
           : 50,
+
+      zoom:
+        Number.isFinite(data?.zoom)
+          ? Math.min(
+              3,
+              Math.max(1, data.zoom)
+            )
+          : 1,
     };
   } catch {
     return {
       cover: null,
       cropX: 50,
       cropY: 50,
+      zoom: 1,
     };
   }
 }
@@ -202,6 +212,14 @@ async function saveScenarioMeta(
               Math.max(0, meta.cropY)
             )
           : 50,
+
+      zoom:
+        Number.isFinite(meta?.zoom)
+          ? Math.min(
+              3,
+              Math.max(1, meta.zoom)
+            )
+          : 1,
     }),
 
     {
@@ -612,6 +630,9 @@ export default {
 
           scenarioCropY:
             scenarioMeta.cropY,
+
+          scenarioZoom:
+            scenarioMeta.zoom,
 
           images,
         });
@@ -1520,6 +1541,9 @@ export default {
         const cropY =
           Number(body?.cropY);
 
+        const zoom =
+          Number(body?.zoom);
+
         if (!scenario) {
           return Response.json(
             {
@@ -1535,7 +1559,8 @@ export default {
 
         if (
           !Number.isFinite(cropX) ||
-          !Number.isFinite(cropY)
+          !Number.isFinite(cropY) ||
+          !Number.isFinite(zoom)
         ) {
           return Response.json(
             {
@@ -1571,6 +1596,12 @@ export default {
               Math.min(
                 100,
                 Math.max(0, cropY)
+              ),
+
+            zoom:
+              Math.min(
+                3,
+                Math.max(1, zoom)
               ),
           }
         );
