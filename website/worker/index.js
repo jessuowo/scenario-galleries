@@ -1203,6 +1203,12 @@ export default {
           );
         }
 
+        const currentMeta =
+          await getScenarioMeta(
+            env,
+            scenario
+          );
+
         await saveScenarioMeta(
           env,
           scenario,
@@ -1210,6 +1216,17 @@ export default {
             cover: key,
           }
         );
+
+        if (
+          currentMeta.cover &&
+          currentMeta.cover.startsWith(
+            "_scenario-covers/"
+          )
+        ) {
+          await env.GALLERY_IMAGES.delete(
+            currentMeta.cover
+          );
+        }
 
         return Response.json({
           success: true,
@@ -1225,6 +1242,177 @@ export default {
             success: false,
             message:
               "Could not update scenario cover.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
+    // Upload a dedicated custom scenario cover
+    if (
+      url.pathname ===
+        "/api/admin/scenario-cover-upload" &&
+      request.method === "POST"
+    ) {
+      if (!isAuthorized(request, env)) {
+        return Response.json(
+          {
+            success: false,
+            message: "Unauthorized.",
+          },
+          {
+            status: 401,
+          }
+        );
+      }
+
+      try {
+        const formData =
+          await request.formData();
+
+        const scenario =
+          safeSegment(
+            formData.get("scenario")
+          );
+
+        const file =
+          formData.get("file");
+
+        if (!scenario) {
+          return Response.json(
+            {
+              success: false,
+              message: "Scenario is required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        if (!(file instanceof File)) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Cover image is required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        if (
+          !file.type.startsWith("image/")
+        ) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Scenario cover must be an image.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const maxSize =
+          20 * 1024 * 1024;
+
+        if (file.size > maxSize) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Scenario cover must be smaller than 20 MB.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const extension =
+          file.name.includes(".")
+            ? file.name
+                .slice(
+                  file.name.lastIndexOf(".")
+                )
+                .toLowerCase()
+            : "";
+
+        const key =
+          `_scenario-covers/${scenario}/${crypto.randomUUID()}${extension}`;
+
+        const currentMeta =
+          await getScenarioMeta(
+            env,
+            scenario
+          );
+
+        await env.GALLERY_IMAGES.put(
+          key,
+          file.stream(),
+          {
+            httpMetadata: {
+              contentType:
+                file.type ||
+                "application/octet-stream",
+            },
+
+            customMetadata: {
+              type: "scenario-cover",
+              scenario,
+              originalName: file.name,
+            },
+          }
+        );
+
+        await saveScenarioMeta(
+          env,
+          scenario,
+          {
+            ...currentMeta,
+            cover: key,
+          }
+        );
+
+        // Delete the previous cover ONLY if it was another dedicated upload.
+        if (
+          currentMeta.cover &&
+          currentMeta.cover.startsWith(
+            "_scenario-covers/"
+          ) &&
+          currentMeta.cover !== key
+        ) {
+          await env.GALLERY_IMAGES.delete(
+            currentMeta.cover
+          );
+        }
+
+        return Response.json({
+          success: true,
+          message:
+            "Custom scenario cover uploaded.",
+          cover: key,
+          coverUrl:
+            `/api/gallery-image?key=${encodeURIComponent(
+              key
+            )}`,
+          source: "custom",
+        });
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Could not upload scenario cover.",
           },
           {
             status: 500,
