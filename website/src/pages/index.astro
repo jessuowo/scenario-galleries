@@ -295,6 +295,19 @@ function getScenarioCover(scenario) {
                     ? "image"
                     : "images";
               }
+
+              const coverImage =
+                card.querySelector(
+                  ".scenario-cover-image"
+                );
+
+              if (
+                coverImage &&
+                data.scenarioCover
+              ) {
+                coverImage.src =
+                  data.scenarioCover;
+              }
             } catch (error) {
               console.error(error);
             }
@@ -345,18 +358,6 @@ function getScenarioCover(scenario) {
 
         if (query === "") {
           resultsText.textContent = "";
-              const coverImage =
-                card.querySelector(
-                  ".scenario-cover-image"
-                );
-
-              if (
-                coverImage &&
-                data.scenarioCover
-              ) {
-                coverImage.src =
-                  data.scenarioCover;
-              }
           return;
         }
 
