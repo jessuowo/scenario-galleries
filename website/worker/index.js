@@ -70,6 +70,39 @@ async function getGalleryOrder(
   }
 }
 
+function sortByGalleryOrder(
+  objects,
+  order
+) {
+  if (!Array.isArray(order) || order.length === 0) {
+    return objects;
+  }
+
+  const positions =
+    new Map(
+      order.map((key, index) => [
+        key,
+        index,
+      ])
+    );
+
+  return [...objects].sort(
+    (a, b) => {
+      const aPosition =
+        positions.has(a.key)
+          ? positions.get(a.key)
+          : Number.MAX_SAFE_INTEGER;
+
+      const bPosition =
+        positions.has(b.key)
+          ? positions.get(b.key)
+          : Number.MAX_SAFE_INTEGER;
+
+      return aPosition - bPosition;
+    }
+  );
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -365,7 +398,20 @@ export default {
             ],
           });
 
-        const images = result.objects.map(
+        const savedOrder =
+          await getGalleryOrder(
+            env,
+            scenario,
+            gallery
+          );
+
+        const orderedObjects =
+          sortByGalleryOrder(
+            result.objects,
+            savedOrder
+          );
+
+        const images = orderedObjects.map(
           (object) => ({
             key: object.key,
             size: object.size,
@@ -431,7 +477,20 @@ export default {
           include: ["customMetadata", "httpMetadata"],
         });
 
-        const images = result.objects.map((object) => ({
+        const savedOrder =
+          await getGalleryOrder(
+            env,
+            scenario,
+            gallery
+          );
+
+        const orderedObjects =
+          sortByGalleryOrder(
+            result.objects,
+            savedOrder
+          );
+
+        const images = orderedObjects.map((object) => ({
           key: object.key,
 
           originalName:
