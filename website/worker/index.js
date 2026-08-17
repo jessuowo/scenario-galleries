@@ -361,6 +361,78 @@ export default {
       }
     }
 
+    // Public R2 image
+    if (
+      url.pathname === "/api/gallery-image" &&
+      request.method === "GET"
+    ) {
+      try {
+        const key =
+          url.searchParams.get("key");
+
+        if (!key) {
+          return Response.json(
+            {
+              success: false,
+              message: "Image key is required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const object =
+          await env.GALLERY_IMAGES.get(key);
+
+        if (!object) {
+          return Response.json(
+            {
+              success: false,
+              message: "Image not found.",
+            },
+            {
+              status: 404,
+            }
+          );
+        }
+
+        const headers =
+          new Headers();
+
+        object.writeHttpMetadata(headers);
+
+        headers.set(
+          "etag",
+          object.httpEtag
+        );
+
+        headers.set(
+          "Cache-Control",
+          "public, max-age=31536000, immutable"
+        );
+
+        return new Response(
+          object.body,
+          {
+            headers,
+          }
+        );
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message: "Could not load image.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
