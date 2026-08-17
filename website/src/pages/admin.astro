@@ -107,7 +107,7 @@ const adminScenarios = scenarios.map((scenario) => ({
 
           <div class="scenario-preview-section">
             <div class="scenario-preview-heading">
-              <span>Live Crop Preview</span>
+              <span>Homepage Card Preview</span>
 
               <span id="crop-preview-position">
                 50% × 50%
@@ -122,7 +122,7 @@ const adminScenarios = scenarios.map((scenario) => ({
             </div>
 
             <p class="preview-help">
-              Zoom above 100%, then drag the image to reposition it. You can also use the sliders for fine adjustments.
+              This framing is used on the main homepage card. Zoom above 100%, then drag the image to reposition it.
             </p>
           </div>
 
@@ -1697,6 +1697,81 @@ const adminScenarios = scenarios.map((scenario) => ({
               "Save Crop Position";
           } finally {
             saveScenarioCrop.disabled =
+              false;
+          }
+        }
+      );
+
+      saveScenarioPageCrop?.addEventListener(
+        "click",
+        async () => {
+          const cropX =
+            Number(
+              scenarioPageCropX.value
+            );
+
+          const cropY =
+            Number(
+              scenarioPageCropY.value
+            );
+
+          const zoom =
+            Number(
+              scenarioPageCoverZoom.value
+            );
+
+          saveScenarioPageCrop.disabled =
+            true;
+
+          saveScenarioPageCrop.textContent =
+            "Saving...";
+
+          try {
+            const response =
+              await fetch(
+                "/api/admin/scenario-page-cover-crop",
+                {
+                  method: "POST",
+
+                  headers: {
+                    Authorization:
+                      `Bearer ${adminToken}`,
+
+                    "Content-Type":
+                      "application/json",
+                  },
+
+                  body:
+                    JSON.stringify({
+                      scenario:
+                        scenarioSelect.value,
+
+                      cropX,
+                      cropY,
+                      zoom,
+                    }),
+                }
+              );
+
+            if (!response.ok) {
+              throw new Error(
+                "Could not save scenario page framing."
+              );
+            }
+
+            scenarioCoverStatus.textContent =
+              "Scenario page framing saved.";
+
+            saveScenarioPageCrop.textContent =
+              "Save Scenario Page Framing";
+          } catch {
+            scenarioCoverStatus.textContent =
+              "Could not save scenario page framing.";
+
+            saveScenarioPageCrop.textContent =
+              "Save Scenario Page Framing";
+          } finally {
+            saveScenarioPageCrop.disabled =
               false;
           }
         }
