@@ -193,9 +193,29 @@ function getScenarioCover(scenario) {
       </section>
     </main>
 
-    <footer>
-      <p>{site.name} · {site.creator}</p>
-    </footer>
+    <footer class="site-footer">
+  <div class="footer-left">
+    <img
+      src={site.mascot}
+      alt=""
+      class="footer-cat"
+    />
+
+    <div>
+      <p class="footer-name">
+        {site.name}
+      </p>
+
+      <p class="footer-credit">
+        Gallery by {site.creator}
+      </p>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    ✦ made with stories, starlight & cat supervision
+  </p>
+</footer>
   </body>
 </html>
 
@@ -870,7 +890,7 @@ function getScenarioCover(scenario) {
     rgba(161, 132, 255, 0.22);
 }
 
-  footer {
+  .site-footer {
     width: min(
       1200px,
       calc(100% - 40px)
@@ -878,14 +898,65 @@ function getScenarioCover(scenario) {
 
     margin: 0 auto;
 
-    padding: 28px 0 50px;
+    padding: 32px 0 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 28px;
 
     border-top:
-      1px solid #252527;
+      1px solid var(--border-soft);
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+  }
+
+  .footer-cat {
+    display: block;
+
+    width: 48px;
+    height: 48px;
+
+    object-fit: contain;
+
+    filter:
+      drop-shadow(
+        0 0 12px
+        rgba(147, 120, 255, 0.24)
+      );
+  }
+
+  .footer-name {
+    margin: 0;
+
+    color: var(--text-soft);
+
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .footer-credit {
+    margin: 3px 0 0;
 
     color: var(--text-muted);
 
-    font-size: 0.8rem;
+    font-size: 0.72rem;
+  }
+
+  .footer-note {
+    margin: 0;
+
+    color: var(--text-muted);
+
+    font-size: 0.72rem;
+
+    letter-spacing: 0.04em;
   }
 
   @media (max-width: 850px) {
@@ -944,6 +1015,24 @@ function getScenarioCover(scenario) {
 
     .firefly {
       transform: scale(0.85);
+    }
+
+    .site-footer {
+      width: calc(100% - 28px);
+
+      flex-direction: column;
+      align-items: flex-start;
+
+      gap: 18px;
+    }
+
+    .footer-cat {
+      width: 44px;
+      height: 44px;
+    }
+
+    .footer-note {
+      max-width: 260px;
     }
   }
 </style>
