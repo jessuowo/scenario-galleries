@@ -458,12 +458,15 @@ export default {
             ],
           });
 
-        const savedOrder =
-          await getGalleryOrder(
+        const galleryMeta =
+          await getGalleryMeta(
             env,
             scenario,
             gallery
           );
+
+        const savedOrder =
+          galleryMeta.order;
 
         const orderedObjects =
           sortByGalleryOrder(
@@ -486,6 +489,7 @@ export default {
           success: true,
           scenario,
           gallery,
+          cover: galleryMeta.cover,
           images,
         });
       } catch (error) {
