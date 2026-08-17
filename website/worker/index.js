@@ -500,6 +500,108 @@ export default {
       }
     }
 
+    // Public R2 summary for an entire scenario
+    if (
+      url.pathname === "/api/scenario-summary" &&
+      request.method === "GET"
+    ) {
+      try {
+        const scenario = safeSegment(
+          url.searchParams.get("scenario")
+        );
+
+        if (!scenario) {
+          return Response.json(
+            {
+              success: false,
+              message: "Scenario is required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const prefix = `${scenario}/`;
+
+        let result = await env.GALLERY_IMAGES.list({
+          prefix,
+          limit: 1000,
+        });
+
+        const objects = [...result.objects];
+
+        while (result.truncated) {
+          result = await env.GALLERY_IMAGES.list({
+            prefix,
+            limit: 1000,
+            cursor: result.cursor,
+          });
+
+          objects.push(...result.objects);
+        }
+
+        const galleries = {};
+
+        for (const object of objects) {
+          const remainder = object.key.slice(
+            prefix.length
+          );
+
+          const slashIndex = remainder.indexOf("/");
+
+          if (slashIndex === -1) {
+            continue;
+          }
+
+          const gallerySlug = remainder.slice(
+            0,
+            slashIndex
+          );
+
+          if (!gallerySlug) {
+            continue;
+          }
+
+          if (!galleries[gallerySlug]) {
+            galleries[gallerySlug] = {
+              count: 0,
+              cover: null,
+            };
+          }
+
+          galleries[gallerySlug].count += 1;
+
+          if (!galleries[gallerySlug].cover) {
+            galleries[gallerySlug].cover =
+              `/api/gallery-image?key=${encodeURIComponent(
+                object.key
+              )}`;
+          }
+        }
+
+        return Response.json({
+          success: true,
+          scenario,
+          totalImages: objects.length,
+          galleries,
+        });
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Could not load scenario summary.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
