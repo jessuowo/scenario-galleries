@@ -277,6 +277,90 @@ export default {
       }
     }
 
+    // List images in a gallery
+    if (
+      url.pathname === "/api/admin/images" &&
+      request.method === "GET"
+    ) {
+      if (!isAuthorized(request, env)) {
+        return Response.json(
+          {
+            success: false,
+            message: "Unauthorized.",
+          },
+          {
+            status: 401,
+          }
+        );
+      }
+
+      try {
+        const scenario = safeSegment(
+          url.searchParams.get("scenario")
+        );
+
+        const gallery = safeSegment(
+          url.searchParams.get("gallery")
+        );
+
+        if (!scenario || !gallery) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Scenario and gallery are required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const prefix =
+          `${scenario}/${gallery}/`;
+
+        const result =
+          await env.GALLERY_IMAGES.list({
+            prefix,
+            limit: 1000,
+            include: [
+              "customMetadata",
+              "httpMetadata",
+            ],
+          });
+
+        const images = result.objects.map(
+          (object) => ({
+            key: object.key,
+            size: object.size,
+            uploaded: object.uploaded,
+            originalName:
+              object.customMetadata?.originalName ||
+              object.key.split("/").pop(),
+          })
+        );
+
+        return Response.json({
+          success: true,
+          scenario,
+          gallery,
+          images,
+        });
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message: "Could not list images.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
