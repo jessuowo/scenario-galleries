@@ -1,0 +1,194 @@
+:root {
+  /* Main backgrounds */
+  --bg-deep: #040817;
+  --bg-navy: #071535;
+  --bg-blue: #0d2a67;
+  --bg-indigo: #29206f;
+  --bg-purple: #5b38a3;
+
+  /* Surfaces */
+  --surface: rgba(9, 19, 46, 0.78);
+  --surface-hover: rgba(18, 32, 73, 0.9);
+
+  /* Text */
+  --text-main: #f7f7ff;
+  --text-soft: #c2c5df;
+  --text-muted: #858aaa;
+
+  /* Borders */
+  --border-soft: rgba(164, 171, 255, 0.16);
+  --border-glow: rgba(160, 136, 255, 0.5);
+
+  /* Glows */
+  --glow-blue: #62a8ff;
+  --glow-violet: #a487ff;
+  --glow-lavender: #c7b8ff;
+
+  /* Fireflies */
+  --firefly: #fff4a8;
+
+  /* Personal warm accent */
+  --accent-wine: #8a2948;
+}
+
+/* Main celestial background */
+
+html {
+  background: var(--bg-deep);
+}
+
+body {
+  color: var(--text-main);
+
+  background:
+    radial-gradient(
+      circle at 15% -5%,
+      rgba(55, 103, 255, 0.28),
+      transparent 30rem
+    ),
+    radial-gradient(
+      circle at 85% 15%,
+      rgba(130, 71, 255, 0.2),
+      transparent 34rem
+    ),
+    radial-gradient(
+      circle at 55% 85%,
+      rgba(71, 42, 160, 0.15),
+      transparent 35rem
+    ),
+    linear-gradient(
+      180deg,
+      var(--bg-deep) 0%,
+      var(--bg-navy) 52%,
+      #090b22 100%
+    );
+
+  background-attachment: fixed;
+}
+
+/* Soft celestial haze */
+
+body::after {
+  content: "";
+
+  position: fixed;
+  inset: 0;
+
+  pointer-events: none;
+
+  z-index: 0;
+
+  background:
+    radial-gradient(
+      ellipse at 20% 15%,
+      rgba(77, 124, 255, 0.08),
+      transparent 35%
+    ),
+    radial-gradient(
+      ellipse at 78% 30%,
+      rgba(173, 101, 255, 0.07),
+      transparent 35%
+    );
+
+  mix-blend-mode: screen;
+}
+
+/* Tiny glowing stars / fireflies */
+
+body::before {
+  content: "";
+
+  position: fixed;
+  inset: 0;
+
+  pointer-events: none;
+
+  z-index: 0;
+
+  opacity: 0.75;
+
+  background:
+    radial-gradient(
+      circle at 8% 19%,
+      var(--firefly) 0 1px,
+      transparent 2px
+    ),
+    radial-gradient(
+      circle at 21% 61%,
+      rgba(183, 169, 255, 0.95) 0 1px,
+      transparent 2px
+    ),
+    radial-gradient(
+      circle at 33% 28%,
+      rgba(122, 176, 255, 0.9) 0 1.5px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at 46% 72%,
+      var(--firefly) 0 1px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at 59% 16%,
+      rgba(194, 174, 255, 0.95) 0 1px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at 68% 53%,
+      rgba(114, 173, 255, 0.9) 0 1px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at 78% 25%,
+      var(--firefly) 0 1.5px,
+      transparent 4px
+    ),
+    radial-gradient(
+      circle at 91% 67%,
+      rgba(187, 166, 255, 0.9) 0 1px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at 95% 12%,
+      var(--firefly) 0 1px,
+      transparent 3px
+    );
+
+  filter:
+    drop-shadow(0 0 4px rgba(127, 168, 255, 0.75))
+    drop-shadow(0 0 6px rgba(255, 237, 151, 0.35));
+
+  animation:
+    celestial-drift 10s ease-in-out infinite alternate;
+}
+
+/* Keep actual website content above atmosphere */
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes celestial-drift {
+  0% {
+    opacity: 0.45;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 0.85;
+  }
+
+  100% {
+    opacity: 0.6;
+    transform: translateY(-7px);
+  }
+}
+
+/* Respect visitors who disable animation */
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+}

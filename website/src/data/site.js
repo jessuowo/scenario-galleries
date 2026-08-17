@@ -6,6 +6,10 @@ export const site = {
 
   creator: "jessuowo",
 
+  avatar: "/images/site/creator-avatar.png",
+
+  mascot: "/images/site/mascot-cat.png",
+
   description:
     "A collection of visual galleries for my FictionLab scenarios.",
 

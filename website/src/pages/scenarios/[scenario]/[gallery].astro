@@ -1,5 +1,6 @@
 ---
 import { scenarios } from "../../../data/scenarios.js";
+import { site } from "../../../data/site.js";
 
 export function getStaticPaths() {
   return scenarios.flatMap((scenario) =>
@@ -102,7 +103,21 @@ const {
           </section>
         ) : (
           <section class="empty-gallery">
-            <p>No images have been added to this album yet.</p>
+            <div class="empty-content">
+              <div class="mascot-glow">
+                <img
+                  src={site.mascot}
+                  alt="Gallery mascot"
+                  class="mascot-cat"
+                />
+              </div>
+
+              <h2>Nothing here yet</h2>
+
+              <p>
+                This gallery is still waiting for its pictures.
+              </p>
+            </div>
           </section>
         )
       }
@@ -805,15 +820,113 @@ const {
   }
 
   .empty-gallery {
-    min-height: 320px;
+    min-height: 420px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-top: 1px solid #242426;
+    padding: 60px 20px;
 
-    color: #77777c;
+    border-top:
+      1px solid var(--border-soft);
+
+    text-align: center;
+  }
+
+  .empty-content {
+    max-width: 420px;
+  }
+
+  .mascot-glow {
+    position: relative;
+
+    width: 170px;
+    height: 170px;
+
+    margin: 0 auto 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mascot-glow::before {
+    content: "";
+
+    position: absolute;
+
+    width: 125px;
+    height: 125px;
+
+    border-radius: 50%;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(149, 119, 255, 0.35),
+        rgba(67, 123, 255, 0.14) 45%,
+        transparent 72%
+      );
+
+    filter: blur(14px);
+
+    animation:
+      mascot-pulse 4s ease-in-out infinite;
+  }
+
+  .mascot-cat {
+    position: relative;
+    z-index: 1;
+
+    display: block;
+
+    max-width: 160px;
+    max-height: 160px;
+
+    object-fit: contain;
+
+    filter:
+      drop-shadow(
+        0 0 12px
+        rgba(149, 126, 255, 0.28)
+      );
+  }
+
+  .empty-content h2 {
+    margin: 0 0 10px;
+
+    color: var(--text-main);
+
+    font-size: 1.3rem;
+  }
+
+  .empty-content p {
+    margin: 0;
+
+    color: var(--text-muted);
+
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  @keyframes mascot-pulse {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(0.95);
+    }
+
+    50% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mascot-glow::before {
+      animation: none;
+    }
   }
 
   /* Full-screen photo viewer */

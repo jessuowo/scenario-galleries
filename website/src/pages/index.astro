@@ -1,6 +1,7 @@
 ---
 import { scenarios } from "../data/scenarios.js";
 import { site } from "../data/site.js";
+import "../styles/theme.css";
 
 function getScenarioImageCount(scenario) {
   return scenario.galleries.reduce(
@@ -44,8 +45,20 @@ function getScenarioCover(scenario) {
         {site.name}
       </a>
 
-      <nav>
-        <a href="/">Scenarios</a>
+      <nav class="header-actions">
+        <a href="/" class="nav-link">
+          Scenarios
+        </a>
+
+        <div class="creator-badge">
+          <img
+            src={site.avatar}
+            alt={`${site.creator} avatar`}
+            class="creator-avatar"
+          />
+
+          <span>{site.creator}</span>
+        </div>
       </nav>
     </header>
 
@@ -176,14 +189,6 @@ function getScenarioCover(scenario) {
   body {
     margin: 0;
     min-height: 100vh;
-
-    background:
-      radial-gradient(
-        circle at 50% -10%,
-        rgba(255,255,255,0.07),
-        transparent 35rem
-      ),
-      #0b0b0c;
   }
 
   a {
@@ -215,9 +220,96 @@ function getScenarioCover(scenario) {
     letter-spacing: 0.16em;
   }
 
-  nav a {
-    color: #aaa;
-    font-size: 0.9rem;
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .nav-link {
+    color: var(--text-muted);
+
+    font-size: 0.88rem;
+
+    transition:
+      color 0.2s ease,
+      text-shadow 0.2s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--text-main);
+
+    text-shadow:
+      0 0 12px
+      rgba(164, 135, 255, 0.4);
+  }
+
+  .creator-badge {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding:
+      6px 11px 6px 6px;
+
+    border:
+      1px solid
+      var(--border-soft);
+
+    border-radius: 999px;
+
+    background:
+      rgba(8, 19, 48, 0.58);
+
+    backdrop-filter:
+      blur(12px);
+
+    color:
+      var(--text-soft);
+
+    font-size: 0.82rem;
+    font-weight: 600;
+
+    box-shadow:
+      0 0 0
+      rgba(159, 126, 255, 0);
+
+    transition:
+      border-color 0.25s ease,
+      box-shadow 0.25s ease,
+      background 0.25s ease;
+  }
+
+  .creator-badge:hover {
+    border-color:
+      rgba(174, 147, 255, 0.48);
+
+    background:
+      rgba(16, 28, 67, 0.75);
+
+    box-shadow:
+      0 0 22px
+      rgba(133, 104, 255, 0.15);
+  }
+
+  .creator-avatar {
+    display: block;
+
+    width: 32px;
+    height: 32px;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    border:
+      1px solid
+      rgba(195, 183, 255, 0.4);
+
+    box-shadow:
+      0 0 12px
+      rgba(144, 123, 255, 0.18);
   }
 
   main {
@@ -254,8 +346,27 @@ function getScenarioCover(scenario) {
       clamp(3rem, 8vw, 6.5rem);
 
     line-height: 0.95;
-
     letter-spacing: -0.055em;
+
+    background:
+      linear-gradient(
+        105deg,
+        #ffffff 5%,
+        #c8dcff 38%,
+        #cbb9ff 68%,
+        #ffffff 100%
+      );
+
+    background-clip: text;
+    -webkit-background-clip: text;
+
+    color: transparent;
+
+    filter:
+      drop-shadow(
+        0 0 18px
+        rgba(137, 134, 255, 0.22)
+      );
   }
 
   .intro {
@@ -263,7 +374,7 @@ function getScenarioCover(scenario) {
 
     margin: 30px 0 0;
 
-    color: #a7a7ab;
+    color: var(--text-soft);  
 
     font-size: 1.05rem;
     line-height: 1.7;
@@ -292,7 +403,7 @@ function getScenarioCover(scenario) {
   }
 
   .section-heading span {
-    color: #77777c;
+    color: var(--text-muted);
 
     font-size: 0.85rem;
   }
@@ -310,23 +421,42 @@ function getScenarioCover(scenario) {
     overflow: hidden;
 
     border:
-      1px solid #28282b;
+      1px solid
+      var(--border-soft);
 
-    border-radius: 16px;
+    border-radius: 18px;
 
-    background: #111113;
+    background:
+      linear-gradient(
+        145deg,
+        rgba(16, 31, 70, 0.9),
+        rgba(8, 14, 38, 0.88)
+      );
+
+    box-shadow:
+      0 18px 45px
+      rgba(0, 0, 20, 0.25);
+
+    backdrop-filter: blur(14px);
 
     transition:
-      transform 0.2s ease,
-      border-color 0.2s ease;
+      transform 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
   }
 
   .scenario-card:hover {
-    transform:
-      translateY(-4px);
+  transform: translateY(-5px);
 
-    border-color: #55555b;
-  }
+  border-color:
+    var(--border-glow);
+
+  box-shadow:
+    0 20px 55px
+      rgba(28, 40, 110, 0.32),
+    0 0 30px
+      rgba(146, 112, 255, 0.13);
+}
 
   .cover {
     aspect-ratio: 16 / 10;
@@ -370,7 +500,7 @@ function getScenarioCover(scenario) {
   .card-content > p {
     margin: 12px 0 22px;
 
-    color: #8f8f94;
+    color: var(--text-muted);
 
     font-size: 0.9rem;
     line-height: 1.55;
@@ -382,17 +512,23 @@ function getScenarioCover(scenario) {
 
     margin-bottom: 22px;
 
-    color: #68686d;
+    color: var(--text-muted);
 
     font-size: 0.8rem;
   }
 
-  .view-link {
-    display: inline-block;
+ .view-link {
+  display: inline-block;
 
-    font-size: 0.88rem;
-    font-weight: 650;
-  }
+  color: #c9bcff;
+
+  font-size: 0.88rem;
+  font-weight: 650;
+
+  text-shadow:
+    0 0 10px
+    rgba(161, 132, 255, 0.22);
+}
 
   footer {
     width: min(
@@ -407,7 +543,7 @@ function getScenarioCover(scenario) {
     border-top:
       1px solid #252527;
 
-    color: #68686d;
+    color: var(--text-muted);
 
     font-size: 0.8rem;
   }
@@ -437,6 +573,28 @@ function getScenarioCover(scenario) {
 
     .scenario-grid {
       grid-template-columns: 1fr;
+    }
+
+    .header-actions {
+      gap: 10px;
+    }
+
+    .nav-link {
+      display: none;
+    }
+
+    .creator-badge {
+      padding:
+        4px 8px 4px 4px;
+    }
+
+    .creator-avatar {
+      width: 30px;
+      height: 30px;
+    }
+
+    .creator-badge span {
+      font-size: 0.76rem;
     }
   }
 </style>
