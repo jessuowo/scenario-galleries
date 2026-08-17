@@ -80,6 +80,18 @@ const adminScenarios = scenarios.map((scenario) => ({
         id="admin-tools"
         hidden
       >
+        <div class="admin-toolbar">
+          <span>Admin unlocked</span>
+
+          <button
+            id="logout-button"
+            class="logout-button"
+            type="button"
+          >
+            Logout
+          </button>
+        </div>
+
         <div class="controls-card">
           <div class="field">
             <label for="scenario-select">
@@ -207,6 +219,11 @@ const adminScenarios = scenarios.map((scenario) => ({
 
       const adminTools =
         document.getElementById("admin-tools");
+
+      const logoutButton =
+        document.getElementById(
+          "logout-button"
+        );
 
       const scenarioSelect =
         document.getElementById("scenario-select");
@@ -822,6 +839,30 @@ const adminScenarios = scenarios.map((scenario) => ({
         uploadFiles
       );
 
+      logoutButton?.addEventListener(
+        "click",
+        () => {
+          sessionStorage.removeItem(
+            "scenarioGalleryAdminToken"
+          );
+
+          adminToken = "";
+
+          tokenInput.value = "";
+
+          loginStatus.textContent = "";
+
+          uploadStatus.textContent = "";
+
+          imageList.innerHTML = "";
+
+          adminTools.hidden = true;
+          loginPanel.hidden = false;
+
+          tokenInput.focus();
+        }
+      );
+
       populateGalleries();
 
       if (adminToken) {
@@ -904,6 +945,45 @@ const adminScenarios = scenarios.map((scenario) => ({
     color: var(--text-soft);
 
     margin-top: 20px;
+  }
+
+  .admin-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    color: var(--text-muted);
+
+    font-size: 0.8rem;
+  }
+
+  .logout-button {
+    padding: 8px 13px;
+
+    border:
+      1px solid
+      rgba(201, 188, 255, 0.3);
+
+    border-radius: 8px;
+
+    background:
+      rgba(15, 28, 65, 0.65);
+
+    color: var(--text-soft);
+
+    font-weight: 700;
+
+    cursor: pointer;
+  }
+
+  .logout-button:hover {
+    border-color:
+      rgba(201, 188, 255, 0.6);
+
+    background:
+      rgba(31, 43, 88, 0.8);
   }
 
   .login-panel,
