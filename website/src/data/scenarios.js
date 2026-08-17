@@ -17,11 +17,11 @@ function createImages({
 
 export const scenarios = [
   {
-    title: "Max the Roommate that Hates You",
+    title: "Max the Roommate that Hates You V2",
     slug: "max-roommate",
 
     description:
-      "Character artwork, locations, visual references, and story moments from the scenario.",
+      "Character artwork, locations, and visual references from the scenario.",
 
     // Temporary cover — we can replace this later
     cover: "/images/max-roommate/max/max-01.png",
@@ -36,7 +36,7 @@ export const scenarios = [
         type: "Character Gallery",
 
         description:
-          "Character artwork and visual references for Maxwell “Max” Thorne.",
+          "Character artwork for Maxwell “Max” Thorne.",
 
         cover: "/images/max-roommate/max/max-01.png",
 
@@ -56,7 +56,7 @@ export const scenarios = [
         type: "Character Gallery",
 
         description:
-          'Character artwork and visual references for Jasper "Jazz" Callahan.',
+          'Character artwork for Jasper "Jazz" Callahan.',
 
         cover: "",
         rating: "sfw",
@@ -69,7 +69,7 @@ export const scenarios = [
         type: "Character Gallery",
 
         description:
-          "Character artwork and visual references for Ethan Parker.",
+          "Character artwork for Ethan Parker.",
 
         cover: "",
         rating: "sfw",
@@ -82,7 +82,7 @@ export const scenarios = [
         type: "Character Gallery",
 
         description:
-          "Character artwork and visual references for Jason Rivers.",
+          "Character artwork for Jason Rivers.",
 
         cover: "",
         rating: "sfw",
@@ -95,7 +95,7 @@ export const scenarios = [
         type: "Character Gallery",
 
         description:
-          "Character artwork and visual references for Brianna “Bree” Carter.",
+          "Character artwork for Brianna “Bree” Carter.",
 
         cover: "",
         rating: "sfw",
@@ -121,7 +121,7 @@ export const scenarios = [
         type: "Scene Gallery",
 
         description:
-          "Illustrated scenes and memorable moments from the scenario.",
+          "Illustrated scenes and memorable items from the scenario.",
 
         cover: "",
         rating: "sfw",
