@@ -121,14 +121,15 @@ const adminScenarios = scenarios.map((scenario) => ({
 
           <label
             class="upload-area"
+            id="upload-area"
             for="image-files"
           >
             <strong>
-              Choose images
+              Choose or drop images
             </strong>
 
             <span>
-              PNG, JPG, WebP, GIF, etc.
+              Drag images here, or click to browse
             </span>
 
             <input
@@ -215,6 +216,9 @@ const adminScenarios = scenarios.map((scenario) => ({
 
       const fileInput =
         document.getElementById("image-files");
+
+      const uploadArea =
+        document.getElementById("upload-area");
 
       const selectedFiles =
         document.getElementById("selected-files");
@@ -706,39 +710,112 @@ const adminScenarios = scenarios.map((scenario) => ({
         loadImages
       );
 
-      fileInput.addEventListener(
-        "change",
-        () => {
-          const files =
-            Array.from(
-              fileInput.files || []
+      function updateSelectedFiles() {
+        const files =
+          Array.from(
+            fileInput.files || []
+          );
+
+        selectedFiles.innerHTML = "";
+
+        files.forEach((file) => {
+          const item =
+            document.createElement(
+              "div"
             );
 
-          selectedFiles.innerHTML =
-            "";
+          item.textContent =
+            `${file.name} · ${formatBytes(
+              file.size
+            )}`;
 
-          files.forEach(
-            (file) => {
-              const item =
-                document.createElement(
-                  "div"
-                );
+          selectedFiles.appendChild(
+            item
+          );
+        });
 
-              item.textContent =
-                `${file.name} · ${formatBytes(
-                  file.size
-                )}`;
+        uploadButton.disabled =
+          files.length === 0;
+      }
 
-              selectedFiles.appendChild(
-                item
+      fileInput.addEventListener(
+        "change",
+        updateSelectedFiles
+      );
+
+      if (uploadArea) {
+        [
+          "dragenter",
+          "dragover",
+        ].forEach((eventName) => {
+          uploadArea.addEventListener(
+            eventName,
+            (event) => {
+              event.preventDefault();
+
+              uploadArea.classList.add(
+                "dragging"
               );
             }
           );
+        });
 
-          uploadButton.disabled =
-            files.length === 0;
-        }
-      );
+        [
+          "dragleave",
+          "drop",
+        ].forEach((eventName) => {
+          uploadArea.addEventListener(
+            eventName,
+            (event) => {
+              event.preventDefault();
+
+              uploadArea.classList.remove(
+                "dragging"
+              );
+            }
+          );
+        });
+
+        uploadArea.addEventListener(
+          "drop",
+          (event) => {
+            const droppedFiles =
+              Array.from(
+                event.dataTransfer?.files ||
+                  []
+              ).filter((file) =>
+                file.type.startsWith(
+                  "image/"
+                )
+              );
+
+            if (
+              droppedFiles.length === 0
+            ) {
+              uploadStatus.textContent =
+                "Please drop image files only.";
+
+              return;
+            }
+
+            const transfer =
+              new DataTransfer();
+
+            droppedFiles.forEach(
+              (file) => {
+                transfer.items.add(file);
+              }
+            );
+
+            fileInput.files =
+              transfer.files;
+
+            uploadStatus.textContent = "";
+
+            updateSelectedFiles();
+          }
+        );
+      }
 
       uploadButton.addEventListener(
         "click",
@@ -993,6 +1070,12 @@ const adminScenarios = scenarios.map((scenario) => ({
     color: #d9d2ff;
 
     cursor: pointer;
+
+    transition:
+      border-color 0.2s ease,
+      background 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
   }
 
   .upload-area:hover {
@@ -1001,6 +1084,21 @@ const adminScenarios = scenarios.map((scenario) => ({
 
     background:
       rgba(18, 29, 68, 0.65);
+  }
+
+  .upload-area.dragging {
+    border-color:
+      rgba(215, 201, 255, 0.95);
+
+    background:
+      rgba(40, 44, 105, 0.78);
+
+    box-shadow:
+      0 0 28px
+      rgba(117, 89, 214, 0.24);
+
+    transform:
+      scale(1.01);
   }
 
   .upload-area span {
