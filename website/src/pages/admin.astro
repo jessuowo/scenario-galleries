@@ -447,6 +447,11 @@ const adminScenarios = scenarios.map((scenario) => ({
       </section>
     </main>
 
+    <script
+      is:inline
+      src="/scripts/cover-frame.js"
+    ></script>
+
     <script define:vars={{ adminScenarios }}>
       const tokenInput =
         document.getElementById("admin-token");
@@ -1622,29 +1627,13 @@ const adminScenarios = scenarios.map((scenario) => ({
           return;
         }
 
-        const rect =
-          scenarioCoverPreview.getBoundingClientRect();
-
-        const maxX =
-          (rect.width * (zoom - 1)) / 2;
-
-        const maxY =
-          (rect.height * (zoom - 1)) / 2;
-
-        const translateX =
-          ((50 - x) / 50) * maxX;
-
-        const translateY =
-          ((50 - y) / 50) * maxY;
-
-        previewImage.style.objectPosition =
-          "50% 50%";
-
-        previewImage.style.transformOrigin =
-          "50% 50%";
-
-        previewImage.style.transform =
-          `translate3d(${translateX}px, ${translateY}px, 0) scale(${zoom})`;
+        window.CoverFrame.apply(
+          previewImage,
+          scenarioCoverPreview,
+          x,
+          y,
+          zoom
+        );
       }
 
       scenarioCropX?.addEventListener(
@@ -1693,29 +1682,13 @@ const adminScenarios = scenarios.map((scenario) => ({
           return;
         }
 
-        const rect =
-          scenarioPageCoverPreview.getBoundingClientRect();
-
-        const maxX =
-          (rect.width * (zoom - 1)) / 2;
-
-        const maxY =
-          (rect.height * (zoom - 1)) / 2;
-
-        const translateX =
-          ((50 - x) / 50) * maxX;
-
-        const translateY =
-          ((50 - y) / 50) * maxY;
-
-        previewImage.style.objectPosition =
-          "50% 50%";
-
-        previewImage.style.transformOrigin =
-          "50% 50%";
-
-        previewImage.style.transform =
-          `translate3d(${translateX}px, ${translateY}px, 0) scale(${zoom})`;
+        window.CoverFrame.apply(
+          previewImage,
+          scenarioPageCoverPreview,
+          x,
+          y,
+          zoom
+        );
       }
 
       scenarioPageCropX?.addEventListener(
@@ -2813,24 +2786,24 @@ const adminScenarios = scenarios.map((scenario) => ({
   }
 
   .scenario-cover-preview img {
-    width: 100%;
-    height: 100%;
+    position: absolute;
 
     display: block;
 
-    object-fit: cover;
-    object-position: 50% 50%;
+    max-width: none;
+    max-height: none;
 
-    transform: scale(1);
-    transform-origin: 50% 50%;
+    object-fit: fill;
 
     transition: none;
 
-    pointer-events: none;
-
     will-change:
-      transform,
-      object-position;
+      left,
+      top,
+      width,
+      height;
+
+    pointer-events: none;
   }
 
   .crop-controls {
