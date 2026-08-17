@@ -34,6 +34,42 @@ function safeFilename(filename) {
   return `${cleanBase}${extension}`;
 }
 
+function galleryOrderKey(
+  scenario,
+  gallery
+) {
+  return `_gallery-meta/${scenario}/${gallery}.json`;
+}
+
+async function getGalleryOrder(
+  env,
+  scenario,
+  gallery
+) {
+  try {
+    const object =
+      await env.GALLERY_IMAGES.get(
+        galleryOrderKey(
+          scenario,
+          gallery
+        )
+      );
+
+    if (!object) {
+      return [];
+    }
+
+    const data =
+      await object.json();
+
+    return Array.isArray(data?.order)
+      ? data.order
+      : [];
+  } catch {
+    return [];
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -594,6 +630,121 @@ export default {
             success: false,
             message:
               "Could not load scenario summary.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
+    // Save custom image order
+    if (
+      url.pathname === "/api/admin/reorder" &&
+      request.method === "POST"
+    ) {
+      if (!isAuthorized(request, env)) {
+        return Response.json(
+          {
+            success: false,
+            message: "Unauthorized.",
+          },
+          {
+            status: 401,
+          }
+        );
+      }
+
+      try {
+        const body =
+          await request.json();
+
+        const scenario =
+          safeSegment(body?.scenario);
+
+        const gallery =
+          safeSegment(body?.gallery);
+
+        const keys =
+          Array.isArray(body?.keys)
+            ? body.keys
+            : [];
+
+        if (
+          !scenario ||
+          !gallery
+        ) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Scenario and gallery are required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const prefix =
+          `${scenario}/${gallery}/`;
+
+        const validKeys =
+          keys.filter(
+            (key) =>
+              typeof key === "string" &&
+              key.startsWith(prefix)
+          );
+
+        if (
+          validKeys.length !==
+          keys.length
+        ) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Invalid image key.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const uniqueKeys =
+          [...new Set(validKeys)];
+
+        await env.GALLERY_IMAGES.put(
+          galleryOrderKey(
+            scenario,
+            gallery
+          ),
+          JSON.stringify({
+            order: uniqueKeys,
+          }),
+          {
+            httpMetadata: {
+              contentType:
+                "application/json",
+            },
+          }
+        );
+
+        return Response.json({
+          success: true,
+          message:
+            "Gallery order saved.",
+          order: uniqueKeys,
+        });
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Could not save gallery order.",
           },
           {
             status: 500,
