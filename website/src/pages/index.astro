@@ -93,6 +93,41 @@ function getScenarioCover(scenario) {
           </span>
         </div>
 
+        <div class="scenario-search">
+          <div class="search-box">
+            <svg
+              class="search-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                d="M11 4a7 7 0 1 0 4.9 12l4.05 4.05 1.4-1.4L17.3 14.6A7 7 0 0 0 11 4Zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"
+                fill="currentColor"
+              />
+            </svg>
+
+            <input
+              id="scenario-search"
+              type="search"
+              placeholder="Search scenarios, characters, or galleries..."
+              autocomplete="off"
+              aria-label="Search scenarios"
+            />
+
+            <button
+              id="clear-search"
+              class="clear-search"
+              type="button"
+              aria-label="Clear search"
+              hidden
+            >
+              ×
+            </button>
+          </div>
+
+          <p class="search-results" id="search-results"></p>
+        </div>
+
         <div class="scenario-grid">
           {
             scenarios.map((scenario) => {
@@ -102,10 +137,23 @@ function getScenarioCover(scenario) {
               const cover =
                 getScenarioCover(scenario);
 
+                const searchText = [
+  scenario.title,
+  scenario.description,
+  ...scenario.galleries.map(
+    (gallery) =>
+      `${gallery.title} ${gallery.type} ${gallery.description || ""}`
+  ),
+]
+  .join(" ")
+  .toLowerCase();
+
               return (
                 <a
                   class="scenario-card"
                   href={`/scenarios/${scenario.slug}`}
+                  data-search={searchText}
+                  data-title={scenario.title}
                 >
                   <div class="cover">
   {
@@ -177,6 +225,100 @@ function getScenarioCover(scenario) {
     </main>
 
     <SiteFooter />
+
+    <script>
+      const searchInput =
+        document.getElementById("scenario-search");
+
+      const clearButton =
+        document.getElementById("clear-search");
+
+      const resultsText =
+        document.getElementById("search-results");
+
+      const scenarioCards = Array.from(
+        document.querySelectorAll(".scenario-card")
+      );
+
+      function filterScenarios() {
+        if (!(searchInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        const query =
+          searchInput.value
+            .trim()
+            .toLowerCase();
+
+        let visibleCount = 0;
+
+        scenarioCards.forEach((card) => {
+          const searchableText =
+            card.getAttribute("data-search") || "";
+
+          const matches =
+            query === "" ||
+            searchableText.includes(query);
+
+          card.classList.toggle(
+            "search-hidden",
+            !matches
+          );
+
+          if (matches) {
+            visibleCount++;
+          }
+        });
+
+        if (clearButton) {
+          clearButton.hidden =
+            query.length === 0;
+        }
+
+        if (!resultsText) {
+          return;
+        }
+
+        if (query === "") {
+          resultsText.textContent = "";
+          return;
+        }
+
+        if (visibleCount === 0) {
+          resultsText.textContent =
+            `No scenarios found for “${searchInput.value.trim()}”`;
+        } else {
+          resultsText.textContent =
+            `${visibleCount} ${
+              visibleCount === 1
+                ? "scenario"
+                : "scenarios"
+            } found`;
+        }
+      }
+
+      searchInput?.addEventListener(
+        "input",
+        filterScenarios
+      );
+
+      clearButton?.addEventListener(
+        "click",
+        () => {
+          if (
+            !(searchInput instanceof HTMLInputElement)
+          ) {
+            return;
+          }
+
+          searchInput.value = "";
+
+          filterScenarios();
+
+          searchInput.focus();
+        }
+      );
+    </script>
   </body>
 </html>
 
@@ -483,6 +625,146 @@ function getScenarioCover(scenario) {
     0 0 14px
     rgba(164, 137, 255, 0.3);
 }
+
+  .scenario-search {
+    margin-bottom: 32px;
+  }
+
+  .search-box {
+    position: relative;
+
+    max-width: 620px;
+
+    display: flex;
+    align-items: center;
+
+    border:
+      1px solid
+      var(--border-soft);
+
+    border-radius: 14px;
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(14, 30, 68, 0.78),
+        rgba(7, 13, 37, 0.84)
+      );
+
+    backdrop-filter:
+      blur(14px);
+
+    box-shadow:
+      0 12px 35px
+        rgba(0, 0, 25, 0.2),
+      0 0 24px
+        rgba(122, 92, 255, 0.06);
+
+    transition:
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .search-box:focus-within {
+    border-color:
+      rgba(177, 153, 255, 0.52);
+
+    box-shadow:
+      0 14px 40px
+        rgba(0, 0, 30, 0.25),
+      0 0 28px
+        rgba(137, 104, 255, 0.16);
+  }
+
+  .search-icon {
+    position: absolute;
+
+    left: 17px;
+
+    width: 19px;
+    height: 19px;
+
+    color: #a99cff;
+
+    pointer-events: none;
+
+    filter:
+      drop-shadow(
+        0 0 6px
+        rgba(157, 132, 255, 0.3)
+      );
+  }
+
+  #scenario-search {
+    width: 100%;
+
+    padding:
+      16px 48px 16px 48px;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: var(--text-main);
+
+    font: inherit;
+    font-size: 0.92rem;
+  }
+
+  #scenario-search::placeholder {
+    color: var(--text-muted);
+  }
+
+  #scenario-search::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  .clear-search {
+    position: absolute;
+
+    right: 10px;
+
+    width: 34px;
+    height: 34px;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: var(--text-muted);
+
+    font-size: 1.35rem;
+
+    cursor: pointer;
+
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .clear-search:hover {
+    color: white;
+
+    background:
+      rgba(166, 143, 255, 0.1);
+  }
+
+  .search-results {
+    min-height: 20px;
+
+    margin:
+      9px 0 0 4px;
+
+    color: var(--text-muted);
+
+    font-size: 0.76rem;
+  }
+
+  .scenario-card.search-hidden {
+    display: none;
+  }
 
   .scenario-section {
     padding-bottom: 110px;
