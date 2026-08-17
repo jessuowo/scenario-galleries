@@ -361,6 +361,73 @@ export default {
       }
     }
 
+    // Public list of images in a gallery
+    if (
+      url.pathname === "/api/gallery-images" &&
+      request.method === "GET"
+    ) {
+      try {
+        const scenario = safeSegment(
+          url.searchParams.get("scenario")
+        );
+
+        const gallery = safeSegment(
+          url.searchParams.get("gallery")
+        );
+
+        if (!scenario || !gallery) {
+          return Response.json(
+            {
+              success: false,
+              message: "Scenario and gallery are required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const prefix = `${scenario}/${gallery}/`;
+
+        const result = await env.GALLERY_IMAGES.list({
+          prefix,
+          limit: 1000,
+          include: ["customMetadata", "httpMetadata"],
+        });
+
+        const images = result.objects.map((object) => ({
+          key: object.key,
+
+          originalName:
+            object.customMetadata?.originalName ||
+            object.key.split("/").pop(),
+
+          url: `/api/gallery-image?key=${encodeURIComponent(
+            object.key
+          )}`,
+        }));
+
+        return Response.json({
+          success: true,
+          scenario,
+          gallery,
+          images,
+        });
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message: "Could not load gallery images.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
     // Public R2 image
     if (
       url.pathname === "/api/gallery-image" &&
