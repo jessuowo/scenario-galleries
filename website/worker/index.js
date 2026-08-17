@@ -1717,6 +1717,131 @@ export default {
       }
     }
 
+    // Save separate scenario page cover framing
+    if (
+      url.pathname ===
+        "/api/admin/scenario-page-cover-crop" &&
+      request.method === "POST"
+    ) {
+      if (!isAuthorized(request, env)) {
+        return Response.json(
+          {
+            success: false,
+            message: "Unauthorized.",
+          },
+          {
+            status: 401,
+          }
+        );
+      }
+
+      try {
+        const body =
+          await request.json();
+
+        const scenario =
+          safeSegment(
+            body?.scenario
+          );
+
+        const cropX =
+          Number(body?.cropX);
+
+        const cropY =
+          Number(body?.cropY);
+
+        const zoom =
+          Number(body?.zoom);
+
+        if (!scenario) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Scenario is required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        if (
+          !Number.isFinite(cropX) ||
+          !Number.isFinite(cropY) ||
+          !Number.isFinite(zoom)
+        ) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Invalid scenario page framing.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const currentMeta =
+          await getScenarioMeta(
+            env,
+            scenario
+          );
+
+        const pageCropX =
+          Math.min(
+            100,
+            Math.max(0, cropX)
+          );
+
+        const pageCropY =
+          Math.min(
+            100,
+            Math.max(0, cropY)
+          );
+
+        const pageZoom =
+          Math.min(
+            3,
+            Math.max(1, zoom)
+          );
+
+        await saveScenarioMeta(
+          env,
+          scenario,
+          {
+            ...currentMeta,
+            pageCropX,
+            pageCropY,
+            pageZoom,
+          }
+        );
+
+        return Response.json({
+          success: true,
+          message:
+            "Scenario page framing saved.",
+          pageCropX,
+          pageCropY,
+          pageZoom,
+        });
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Could not save scenario page framing.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
