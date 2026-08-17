@@ -81,54 +81,57 @@ function getScenarioCover(scenario) {
       </section>
 
       <section class="scenario-section">
-        <div class="section-heading">
-          <h2>Scenarios</h2>
+  <div class="section-heading">
+    <h2>Scenarios</h2>
 
-          <span>
-            {scenarios.length}
-            {" "}
-            {scenarios.length === 1
-              ? "scenario"
-              : "scenarios"}
-          </span>
-        </div>
+    <span>
+      {scenarios.length}
+      {" "}
+      {scenarios.length === 1
+        ? "scenario"
+        : "scenarios"}
+    </span>
+  </div>
 
-        <div class="scenario-search">
-          <div class="search-box">
-            <svg
-              class="search-icon"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M11 4a7 7 0 1 0 4.9 12l4.05 4.05 1.4-1.4L17.3 14.6A7 7 0 0 0 11 4Zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"
-                fill="currentColor"
-              />
-            </svg>
+  <div class="scenario-search">
+    <div class="search-box">
+      <svg
+        class="search-icon"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          d="M11 4a7 7 0 1 0 4.9 12l4.05 4.05 1.4-1.4L17.3 14.6A7 7 0 0 0 11 4Zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"
+          fill="currentColor"
+        />
+      </svg>
 
-            <input
-              id="scenario-search"
-              type="search"
-              placeholder="Search scenarios, characters, or galleries..."
-              autocomplete="off"
-              aria-label="Search scenarios"
-            />
+      <input
+        id="scenario-search"
+        type="search"
+        placeholder="Search scenarios, characters, or galleries..."
+        autocomplete="off"
+        aria-label="Search scenarios"
+      />
 
-            <button
-              id="clear-search"
-              class="clear-search"
-              type="button"
-              aria-label="Clear search"
-              hidden
-            >
-              ×
-            </button>
-          </div>
+      <button
+        id="clear-search"
+        class="clear-search"
+        type="button"
+        aria-label="Clear search"
+        hidden
+      >
+        ×
+      </button>
+    </div>
 
-          <p class="search-results" id="search-results"></p>
-        </div>
+    <p
+      class="search-results"
+      id="search-results"
+    ></p>
+  </div>
 
-        <div class="scenario-grid">
+  <div class="scenario-grid">
           {
             scenarios.map((scenario) => {
               const totalImages =
