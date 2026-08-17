@@ -136,7 +136,7 @@ export const scenarios = [
     slug: "torn-between-two",
 
     description:
-      "Character artwork, locations, and visual moments from the Torn Between Two scenario.",
+      "Character artwork, locations, and visual references from the Torn Between Two scenario.",
 
     // Temporary fallback until you upload
     // a dedicated scenario cover through /admin.
@@ -180,10 +180,10 @@ export const scenarios = [
 
         slug: "locations",
 
-        type: "Location Gallery",
+        type: "Locations Gallery",
 
         description:
-          "Locations and visual settings from Torn Between Two.",
+          "Locations, interiors, and visual references from the scenario.",
 
         rating: "sfw",
 
@@ -198,7 +198,7 @@ export const scenarios = [
         type: "Story Gallery",
 
         description:
-          "Scenes and memorable visual moments from Torn Between Two.",
+          "Illustrated scenes and memorable items from the scenario.",
 
         rating: "sfw",
 
