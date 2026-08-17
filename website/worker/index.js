@@ -134,6 +134,8 @@ async function getScenarioMeta(
     if (!object) {
       return {
         cover: null,
+        cropX: 50,
+        cropY: 50,
       };
     }
 
@@ -145,10 +147,28 @@ async function getScenarioMeta(
         typeof data?.cover === "string"
           ? data.cover
           : null,
+
+      cropX:
+        Number.isFinite(data?.cropX)
+          ? Math.min(
+              100,
+              Math.max(0, data.cropX)
+            )
+          : 50,
+
+      cropY:
+        Number.isFinite(data?.cropY)
+          ? Math.min(
+              100,
+              Math.max(0, data.cropY)
+            )
+          : 50,
     };
   } catch {
     return {
       cover: null,
+      cropX: 50,
+      cropY: 50,
     };
   }
 }
@@ -166,6 +186,22 @@ async function saveScenarioMeta(
         typeof meta?.cover === "string"
           ? meta.cover
           : null,
+
+      cropX:
+        Number.isFinite(meta?.cropX)
+          ? Math.min(
+              100,
+              Math.max(0, meta.cropX)
+            )
+          : 50,
+
+      cropY:
+        Number.isFinite(meta?.cropY)
+          ? Math.min(
+              100,
+              Math.max(0, meta.cropY)
+            )
+          : 50,
     }),
 
     {
@@ -873,6 +909,10 @@ export default {
           scenario,
           totalImages: objects.length,
           scenarioCover,
+          scenarioCropX:
+            scenarioMeta.cropX,
+          scenarioCropY:
+            scenarioMeta.cropY,
           galleries,
         });
       } catch (error) {
@@ -1432,6 +1472,118 @@ export default {
             success: false,
             message:
               "Could not upload scenario cover.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }
+
+    // Save scenario cover crop position
+    if (
+      url.pathname ===
+        "/api/admin/scenario-cover-crop" &&
+      request.method === "POST"
+    ) {
+      if (!isAuthorized(request, env)) {
+        return Response.json(
+          {
+            success: false,
+            message: "Unauthorized.",
+          },
+          {
+            status: 401,
+          }
+        );
+      }
+
+      try {
+        const body =
+          await request.json();
+
+        const scenario =
+          safeSegment(
+            body?.scenario
+          );
+
+        const cropX =
+          Number(body?.cropX);
+
+        const cropY =
+          Number(body?.cropY);
+
+        if (!scenario) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Scenario is required.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        if (
+          !Number.isFinite(cropX) ||
+          !Number.isFinite(cropY)
+        ) {
+          return Response.json(
+            {
+              success: false,
+              message:
+                "Invalid crop position.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const currentMeta =
+          await getScenarioMeta(
+            env,
+            scenario
+          );
+
+        await saveScenarioMeta(
+          env,
+          scenario,
+          {
+            ...currentMeta,
+
+            cropX:
+              Math.min(
+                100,
+                Math.max(0, cropX)
+              ),
+
+            cropY:
+              Math.min(
+                100,
+                Math.max(0, cropY)
+              ),
+          }
+        );
+
+        return Response.json({
+          success: true,
+          message:
+            "Scenario cover crop saved.",
+
+          cropX,
+          cropY,
+        });
+      } catch (error) {
+        console.error(error);
+
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Could not save crop position.",
           },
           {
             status: 500,
