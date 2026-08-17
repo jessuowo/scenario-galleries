@@ -993,6 +993,16 @@ export default {
             scenarioMeta.cropY,
           scenarioZoom:
             scenarioMeta.zoom,
+
+          scenarioPageCropX:
+            scenarioMeta.pageCropX,
+
+          scenarioPageCropY:
+            scenarioMeta.pageCropY,
+
+          scenarioPageZoom:
+            scenarioMeta.pageZoom,
+
           galleries,
         });
       } catch (error) {
