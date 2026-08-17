@@ -82,46 +82,17 @@ const {
         </div>
       </section>
 
-      {
-        gallery.images.length > 0 ? (
-          <section class="gallery">
-            {gallery.images.map((image, index) => (
-              <button
-                class="gallery-item"
-                type="button"
-                data-index={index}
-                data-src={image.src}
-                data-alt={image.alt}
-                aria-label={`Open image ${index + 1}`}
-              >
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  loading="lazy"
-                />
-              </button>
-            ))}
-          </section>
-        ) : (
-          <section class="empty-gallery">
-            <div class="empty-content">
-              <div class="mascot-glow">
-                <img
-                  src={site.mascot}
-                  alt="Gallery mascot"
-                  class="mascot-cat"
-                />
-              </div>
-
-              <h2>Nothing here yet</h2>
-
-              <p>
-                This gallery is still waiting for its pictures.
-              </p>
-            </div>
-          </section>
-        )
-      }
+      <div
+        class="gallery-grid"
+        id="gallery-grid"
+        data-scenario={scenarioSlug}
+        data-gallery={gallery.slug}
+        data-gallery-title={gallery.title}
+      >
+        <p class="gallery-loading">
+          Loading gallery...
+        </p>
+      </div>
     </main>
 
     <div
@@ -644,6 +615,120 @@ const {
           }
         }
       );
+    </script>
+
+    <script>
+      const galleryGrid =
+        document.getElementById("gallery-grid");
+
+      if (galleryGrid) {
+        const scenario =
+          galleryGrid.dataset.scenario;
+
+        const gallery =
+          galleryGrid.dataset.gallery;
+
+        const galleryTitle =
+          galleryGrid.dataset.galleryTitle ||
+          "Gallery";
+
+        async function loadGalleryImages() {
+          try {
+            const response = await fetch(
+              `/api/gallery-images?scenario=${encodeURIComponent(
+                scenario
+              )}&gallery=${encodeURIComponent(
+                gallery
+              )}`
+            );
+
+            if (!response.ok) {
+              throw new Error(
+                "Could not load gallery."
+              );
+            }
+
+            const data =
+              await response.json();
+
+            galleryGrid.innerHTML = "";
+
+            if (
+              !data.images ||
+              data.images.length === 0
+            ) {
+              galleryGrid.innerHTML = `
+                <div class="empty-gallery">
+                  <p>No images have been added to this gallery yet.</p>
+                </div>
+              `;
+
+              return;
+            }
+
+            data.images.forEach(
+              (image, index) => {
+                const button =
+                  document.createElement(
+                    "button"
+                  );
+
+                button.type = "button";
+
+                button.className =
+                  "gallery-item";
+
+                button.dataset.index =
+                  String(index);
+
+                const img =
+                  document.createElement(
+                    "img"
+                  );
+
+                img.src = image.url;
+
+                img.alt =
+                  `${galleryTitle} image ${
+                    index + 1
+                  }`;
+
+                img.loading = "lazy";
+
+                img.decoding = "async";
+
+                button.appendChild(img);
+
+                galleryGrid.appendChild(
+                  button
+                );
+              }
+            );
+
+            window.dispatchEvent(
+              new CustomEvent(
+                "gallery-images-loaded",
+                {
+                  detail: {
+                    images:
+                      data.images,
+                  },
+                }
+              )
+            );
+          } catch (error) {
+            console.error(error);
+
+            galleryGrid.innerHTML = `
+              <div class="empty-gallery">
+                <p>Could not load this gallery.</p>
+              </div>
+            `;
+          }
+        }
+
+        loadGalleryImages();
+      }
     </script>
   </body>
 </html>
