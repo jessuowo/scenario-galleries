@@ -1,0 +1,1131 @@
+---
+import { scenarios } from "../data/scenarios.js";
+import "../styles/theme.css";
+
+const adminScenarios = scenarios.map((scenario) => ({
+  title: scenario.title,
+  slug: scenario.slug,
+  galleries: scenario.galleries.map((gallery) => ({
+    title: gallery.title,
+    slug: gallery.slug,
+  })),
+}));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
+    <title>Gallery Admin</title>
+  </head>
+
+  <body>
+    <main class="admin-page">
+      <a href="/" class="back-link">
+        ← Back to site
+      </a>
+
+      <section class="admin-header">
+        <p class="eyebrow">
+          PRIVATE GALLERY MANAGEMENT
+        </p>
+
+        <h1>Gallery Admin</h1>
+
+        <p>
+          Upload and remove images from your scenario galleries.
+        </p>
+      </section>
+
+      <section
+        class="login-panel"
+        id="login-panel"
+      >
+        <h2>Admin Access</h2>
+
+        <p>
+          Enter your admin token to manage gallery images.
+        </p>
+
+        <div class="token-row">
+          <input
+            id="admin-token"
+            type="password"
+            placeholder="Admin token"
+            autocomplete="off"
+          />
+
+          <button
+            id="login-button"
+            type="button"
+          >
+            Unlock
+          </button>
+        </div>
+
+        <p
+          class="status"
+          id="login-status"
+        ></p>
+      </section>
+
+      <section
+        class="admin-tools"
+        id="admin-tools"
+        hidden
+      >
+        <div class="controls-card">
+          <div class="field">
+            <label for="scenario-select">
+              Scenario
+            </label>
+
+            <select id="scenario-select">
+              {
+                adminScenarios.map(
+                  (scenario) => (
+                    <option
+                      value={scenario.slug}
+                    >
+                      {scenario.title}
+                    </option>
+                  )
+                )
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="gallery-select">
+              Gallery
+            </label>
+
+            <select id="gallery-select"></select>
+          </div>
+        </div>
+
+        <section class="upload-card">
+          <div>
+            <p class="eyebrow">
+              UPLOAD
+            </p>
+
+            <h2>Add Images</h2>
+          </div>
+
+          <label
+            class="upload-area"
+            for="image-files"
+          >
+            <strong>
+              Choose images
+            </strong>
+
+            <span>
+              PNG, JPG, WebP, GIF, etc.
+            </span>
+
+            <input
+              id="image-files"
+              type="file"
+              accept="image/*"
+              multiple
+            />
+          </label>
+
+          <div
+            class="selected-files"
+            id="selected-files"
+          ></div>
+
+          <button
+            id="upload-button"
+            class="primary-button"
+            type="button"
+            disabled
+          >
+            Upload Images
+          </button>
+
+          <p
+            class="status"
+            id="upload-status"
+          ></p>
+        </section>
+
+        <section class="existing-card">
+          <div class="existing-heading">
+            <div>
+              <p class="eyebrow">
+                CURRENT ALBUM
+              </p>
+
+              <h2>Existing Images</h2>
+            </div>
+
+            <button
+              id="refresh-button"
+              class="secondary-button"
+              type="button"
+            >
+              Refresh
+            </button>
+          </div>
+
+          <div
+            class="image-list"
+            id="image-list"
+          ></div>
+
+          <p
+            class="status"
+            id="list-status"
+          ></p>
+        </section>
+      </section>
+    </main>
+
+    <script define:vars={{ adminScenarios }}>
+      const tokenInput =
+        document.getElementById("admin-token");
+
+      const loginButton =
+        document.getElementById("login-button");
+
+      const loginStatus =
+        document.getElementById("login-status");
+
+      const loginPanel =
+        document.getElementById("login-panel");
+
+      const adminTools =
+        document.getElementById("admin-tools");
+
+      const scenarioSelect =
+        document.getElementById("scenario-select");
+
+      const gallerySelect =
+        document.getElementById("gallery-select");
+
+      const fileInput =
+        document.getElementById("image-files");
+
+      const selectedFiles =
+        document.getElementById("selected-files");
+
+      const uploadButton =
+        document.getElementById("upload-button");
+
+      const uploadStatus =
+        document.getElementById("upload-status");
+
+      const imageList =
+        document.getElementById("image-list");
+
+      const listStatus =
+        document.getElementById("list-status");
+
+      const refreshButton =
+        document.getElementById("refresh-button");
+
+      let adminToken =
+        sessionStorage.getItem(
+          "scenarioGalleryAdminToken"
+        ) || "";
+
+      function getSelectedScenario() {
+        return adminScenarios.find(
+          (scenario) =>
+            scenario.slug ===
+            scenarioSelect.value
+        );
+      }
+
+      function populateGalleries() {
+        const scenario =
+          getSelectedScenario();
+
+        gallerySelect.innerHTML = "";
+
+        if (!scenario) {
+          return;
+        }
+
+        scenario.galleries.forEach(
+          (gallery) => {
+            const option =
+              document.createElement(
+                "option"
+              );
+
+            option.value =
+              gallery.slug;
+
+            option.textContent =
+              gallery.title;
+
+            gallerySelect.appendChild(
+              option
+            );
+          }
+        );
+      }
+
+      async function verifyToken(token) {
+        const response =
+          await fetch(
+            "/api/admin-test",
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+        return response.ok;
+      }
+
+      async function unlockAdmin(
+        token
+      ) {
+        loginStatus.textContent =
+          "Checking access...";
+
+        try {
+          const valid =
+            await verifyToken(token);
+
+          if (!valid) {
+            loginStatus.textContent =
+              "Incorrect admin token.";
+
+            return;
+          }
+
+          adminToken = token;
+
+          sessionStorage.setItem(
+            "scenarioGalleryAdminToken",
+            token
+          );
+
+          loginPanel.hidden = true;
+          adminTools.hidden = false;
+
+          populateGalleries();
+
+          await loadImages();
+        } catch {
+          loginStatus.textContent =
+            "Could not verify admin access.";
+        }
+      }
+
+      async function loadImages() {
+        if (!adminToken) {
+          return;
+        }
+
+        const scenario =
+          scenarioSelect.value;
+
+        const gallery =
+          gallerySelect.value;
+
+        listStatus.textContent =
+          "Loading images...";
+
+        imageList.innerHTML = "";
+
+        try {
+          const response =
+            await fetch(
+              `/api/admin/images?scenario=${encodeURIComponent(
+                scenario
+              )}&gallery=${encodeURIComponent(
+                gallery
+              )}`,
+              {
+                headers: {
+                  Authorization:
+                    `Bearer ${adminToken}`,
+                },
+              }
+            );
+
+          if (!response.ok) {
+            throw new Error(
+              "Could not load images."
+            );
+          }
+
+          const data =
+            await response.json();
+
+          if (
+            !data.images ||
+            data.images.length === 0
+          ) {
+            listStatus.textContent =
+              "No R2 images in this gallery yet.";
+
+            return;
+          }
+
+          listStatus.textContent =
+            `${data.images.length} ${
+              data.images.length === 1
+                ? "image"
+                : "images"
+            }`;
+
+          data.images.forEach(
+            (image) => {
+              const row =
+                document.createElement(
+                  "div"
+                );
+
+              row.className =
+                "image-row";
+
+              const info =
+                document.createElement(
+                  "div"
+                );
+
+              info.className =
+                "image-info";
+
+              const name =
+                document.createElement(
+                  "strong"
+                );
+
+              name.textContent =
+                image.originalName;
+
+              const size =
+                document.createElement(
+                  "span"
+                );
+
+              size.textContent =
+                formatBytes(image.size);
+
+              info.append(
+                name,
+                size
+              );
+
+              const deleteButton =
+                document.createElement(
+                  "button"
+                );
+
+              deleteButton.type =
+                "button";
+
+              deleteButton.className =
+                "delete-button";
+
+              deleteButton.textContent =
+                "Delete";
+
+              deleteButton.addEventListener(
+                "click",
+                async () => {
+                  const confirmed =
+                    window.confirm(
+                      `Delete ${image.originalName}?`
+                    );
+
+                  if (!confirmed) {
+                    return;
+                  }
+
+                  deleteButton.disabled =
+                    true;
+
+                  deleteButton.textContent =
+                    "Deleting...";
+
+                  try {
+                    const response =
+                      await fetch(
+                        "/api/admin/delete",
+                        {
+                          method:
+                            "DELETE",
+
+                          headers: {
+                            Authorization:
+                              `Bearer ${adminToken}`,
+
+                            "Content-Type":
+                              "application/json",
+                          },
+
+                          body:
+                            JSON.stringify({
+                              key: image.key,
+                            }),
+                        }
+                      );
+
+                    if (!response.ok) {
+                      throw new Error(
+                        "Delete failed."
+                      );
+                    }
+
+                    await loadImages();
+                  } catch {
+                    deleteButton.disabled =
+                      false;
+
+                    deleteButton.textContent =
+                      "Delete";
+
+                    window.alert(
+                      "Could not delete this image."
+                    );
+                  }
+                }
+              );
+
+              row.append(
+                info,
+                deleteButton
+              );
+
+              imageList.appendChild(
+                row
+              );
+            }
+          );
+        } catch {
+          listStatus.textContent =
+            "Could not load images.";
+        }
+      }
+
+      async function uploadFiles() {
+        const files =
+          Array.from(
+            fileInput.files || []
+          );
+
+        if (
+          files.length === 0 ||
+          !adminToken
+        ) {
+          return;
+        }
+
+        uploadButton.disabled =
+          true;
+
+        let completed = 0;
+
+        for (const file of files) {
+          uploadStatus.textContent =
+            `Uploading ${
+              completed + 1
+            } of ${files.length}...`;
+
+          const formData =
+            new FormData();
+
+          formData.append(
+            "scenario",
+            scenarioSelect.value
+          );
+
+          formData.append(
+            "gallery",
+            gallerySelect.value
+          );
+
+          formData.append(
+            "file",
+            file
+          );
+
+          try {
+            const response =
+              await fetch(
+                "/api/admin/upload",
+                {
+                  method: "POST",
+
+                  headers: {
+                    Authorization:
+                      `Bearer ${adminToken}`,
+                  },
+
+                  body: formData,
+                }
+              );
+
+            if (!response.ok) {
+              const data =
+                await response.json();
+
+              throw new Error(
+                data.message ||
+                  "Upload failed."
+              );
+            }
+
+            completed++;
+          } catch (error) {
+            uploadStatus.textContent =
+              `Upload stopped: ${error.message}`;
+
+            uploadButton.disabled =
+              false;
+
+            return;
+          }
+        }
+
+        uploadStatus.textContent =
+          `${completed} ${
+            completed === 1
+              ? "image"
+              : "images"
+          } uploaded successfully.`;
+
+        fileInput.value = "";
+
+        selectedFiles.innerHTML = "";
+
+        uploadButton.disabled =
+          true;
+
+        await loadImages();
+      }
+
+      function formatBytes(bytes) {
+        if (!bytes) {
+          return "0 KB";
+        }
+
+        const mb =
+          bytes / 1024 / 1024;
+
+        if (mb >= 1) {
+          return `${mb.toFixed(
+            2
+          )} MB`;
+        }
+
+        return `${(
+          bytes / 1024
+        ).toFixed(1)} KB`;
+      }
+
+      loginButton.addEventListener(
+        "click",
+        () => {
+          unlockAdmin(
+            tokenInput.value
+          );
+        }
+      );
+
+      tokenInput.addEventListener(
+        "keydown",
+        (event) => {
+          if (
+            event.key === "Enter"
+          ) {
+            unlockAdmin(
+              tokenInput.value
+            );
+          }
+        }
+      );
+
+      scenarioSelect.addEventListener(
+        "change",
+        async () => {
+          populateGalleries();
+
+          await loadImages();
+        }
+      );
+
+      gallerySelect.addEventListener(
+        "change",
+        loadImages
+      );
+
+      refreshButton.addEventListener(
+        "click",
+        loadImages
+      );
+
+      fileInput.addEventListener(
+        "change",
+        () => {
+          const files =
+            Array.from(
+              fileInput.files || []
+            );
+
+          selectedFiles.innerHTML =
+            "";
+
+          files.forEach(
+            (file) => {
+              const item =
+                document.createElement(
+                  "div"
+                );
+
+              item.textContent =
+                `${file.name} · ${formatBytes(
+                  file.size
+                )}`;
+
+              selectedFiles.appendChild(
+                item
+              );
+            }
+          );
+
+          uploadButton.disabled =
+            files.length === 0;
+        }
+      );
+
+      uploadButton.addEventListener(
+        "click",
+        uploadFiles
+      );
+
+      populateGalleries();
+
+      if (adminToken) {
+        unlockAdmin(adminToken);
+      }
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+
+  .admin-page {
+    width:
+      min(900px, calc(100% - 32px));
+
+    margin: 0 auto;
+
+    padding: 40px 0 100px;
+  }
+
+  .back-link {
+    color: var(--text-muted);
+    text-decoration: none;
+
+    font-size: 0.85rem;
+  }
+
+  .admin-header {
+    padding: 60px 0 45px;
+  }
+
+  .eyebrow {
+    margin: 0 0 10px;
+
+    color: #aa9dff;
+
+    font-size: 0.68rem;
+    font-weight: 750;
+
+    letter-spacing: 0.15em;
+  }
+
+  h1 {
+    margin: 0;
+
+    font-size:
+      clamp(3rem, 8vw, 5.5rem);
+
+    line-height: 0.95;
+
+    background:
+      linear-gradient(
+        105deg,
+        #fff,
+        #c8dcff,
+        #cbb9ff
+      );
+
+    background-clip: text;
+    -webkit-background-clip: text;
+
+    color: transparent;
+  }
+
+  .admin-header > p:last-child {
+    color: var(--text-soft);
+
+    margin-top: 20px;
+  }
+
+  .login-panel,
+  .controls-card,
+  .upload-card,
+  .existing-card {
+    border:
+      1px solid var(--border-soft);
+
+    border-radius: 18px;
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(16, 31, 70, 0.82),
+        rgba(8, 14, 38, 0.88)
+      );
+
+    backdrop-filter: blur(14px);
+
+    box-shadow:
+      0 20px 55px
+      rgba(0,0,20,0.22);
+  }
+
+  .login-panel,
+  .upload-card,
+  .existing-card {
+    padding: 26px;
+  }
+
+  .login-panel h2,
+  .upload-card h2,
+  .existing-card h2 {
+    margin: 0;
+
+    font-size: 1.35rem;
+  }
+
+  .login-panel > p {
+    color: var(--text-muted);
+  }
+
+  .token-row {
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 20px;
+  }
+
+  .token-row input {
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 13px 14px;
+
+    border:
+      1px solid var(--border-soft);
+
+    border-radius: 9px;
+
+    outline: 0;
+
+    background:
+      rgba(3, 9, 28, 0.7);
+
+    color: white;
+  }
+
+  .token-row button,
+  .primary-button {
+    padding: 12px 18px;
+
+    border:
+      1px solid
+      rgba(184, 162, 255, 0.45);
+
+    border-radius: 9px;
+
+    background:
+      linear-gradient(
+        135deg,
+        #536fce,
+        #7049ad
+      );
+
+    color: white;
+
+    font-weight: 700;
+
+    cursor: pointer;
+  }
+
+  .admin-tools {
+    display: grid;
+
+    gap: 24px;
+  }
+
+  .controls-card {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+
+    padding: 22px;
+  }
+
+  .field {
+    display: grid;
+    gap: 7px;
+  }
+
+  .field label {
+    color: var(--text-muted);
+
+    font-size: 0.75rem;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .field select {
+    width: 100%;
+
+    padding: 12px 13px;
+
+    border:
+      1px solid var(--border-soft);
+
+    border-radius: 9px;
+
+    background: #09132d;
+
+    color: white;
+  }
+
+  .upload-area {
+    min-height: 180px;
+
+    margin-top: 22px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    border:
+      1px dashed
+      rgba(182, 162, 255, 0.42);
+
+    border-radius: 14px;
+
+    background:
+      rgba(8, 16, 44, 0.5);
+
+    color: #d9d2ff;
+
+    cursor: pointer;
+  }
+
+  .upload-area:hover {
+    border-color:
+      rgba(201, 188, 255, 0.7);
+
+    background:
+      rgba(18, 29, 68, 0.65);
+  }
+
+  .upload-area span {
+    color: var(--text-muted);
+
+    font-size: 0.8rem;
+  }
+
+  .upload-area input {
+    display: none;
+  }
+
+  .selected-files {
+    display: grid;
+
+    gap: 6px;
+
+    margin-top: 14px;
+
+    color: var(--text-muted);
+
+    font-size: 0.8rem;
+  }
+
+  .primary-button {
+    margin-top: 18px;
+  }
+
+  button:disabled {
+    opacity: 0.45;
+
+    cursor: not-allowed;
+  }
+
+  .existing-heading {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+  }
+
+  .secondary-button,
+  .delete-button {
+    border-radius: 8px;
+
+    cursor: pointer;
+  }
+
+  .secondary-button {
+    padding: 9px 12px;
+
+    border:
+      1px solid var(--border-soft);
+
+    background:
+      rgba(15, 28, 65, 0.7);
+
+    color: var(--text-soft);
+  }
+
+  .image-list {
+    display: grid;
+
+    gap: 10px;
+
+    margin-top: 22px;
+  }
+
+  .image-row {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 13px 14px;
+
+    border:
+      1px solid var(--border-soft);
+
+    border-radius: 10px;
+
+    background:
+      rgba(5, 11, 31, 0.58);
+  }
+
+  .image-info {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+  }
+
+  .image-info strong {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+    color: var(--text-soft);
+
+    font-size: 0.85rem;
+  }
+
+  .image-info span {
+    color: var(--text-muted);
+
+    font-size: 0.72rem;
+  }
+
+  .delete-button {
+    padding: 8px 11px;
+
+    border:
+      1px solid
+      rgba(210, 111, 142, 0.35);
+
+    background:
+      rgba(96, 24, 49, 0.22);
+
+    color: #ffb9cd;
+
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .status {
+    min-height: 18px;
+
+    margin: 12px 0 0;
+
+    color: var(--text-muted);
+
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 600px) {
+    .admin-page {
+      padding-top: 25px;
+    }
+
+    .controls-card {
+      grid-template-columns: 1fr;
+    }
+
+    .token-row {
+      flex-direction: column;
+    }
+
+    .token-row button {
+      width: 100%;
+    }
+  }
+</style>
